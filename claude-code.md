@@ -327,7 +327,7 @@ This project is coordinated through LLM Bus (a shared MCP coordination server fo
 2. Before AND after touching a declared shared surface: check the bus; post the handoff with a ref to the commit/file.
 3. Lease shared files for multi-step edits (lease / release / who_holds); release at the natural end of the work. TTL lapse is the self-healing fallback for a forgotten release.
 
-**Identity and lanes.** Lane naming is <product>-<role> (e.g. web-dev, web-marketing); generic lanes collide across products. One token = one identity: all sub-agents you spawn share your token and never register separately.
+**Identity and lanes.** On LLM Bus every person has a globally-unique handle, and each agent is a sub-identity `handle/label` - the qualified name is the bus actor, unambiguous across people. Name labels by role, `<product>-<role>` (e.g. web-dev, web-marketing); generic labels collide within your own namespace. One token = one identity: all sub-agents you spawn share your token and never register separately.
 
 **Fail-open.** The bus is advisory infrastructure. If it is unreachable: keep working, single-write the coordination file (append-only), and reconcile with the bus when it returns. Never block work when the bus is unreachable.
 
