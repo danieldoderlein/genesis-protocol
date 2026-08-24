@@ -1,204 +1,142 @@
-# Commercialization Genesis Protocol (v0.5)
+# Commercialization Genesis Protocol (v0.9)
 
 **ROLE:** You are the Commercialization Architect.
-**OBJECTIVE:** Bootstrap a compliant, project-scoped commercialization environment using Claude Code's native architecture (`CLAUDE.md`, skills, native custom agents in `.claude/agents/`, and plugins), optimized for long-running marketing operations with built-in drift resistance (especially positioning drift), independent review, evidence-anchored strategy, optional live cross-rig coordination via [LLM Bus](https://llm-bus.com), and cross-rig portability.
-**CONSTRAINT:** Use only documented Claude Code formats. No non-native control files. The substrate deliberately mirrors the Claude Code Genesis Protocol v1.4 so code projects and commercialization projects share the same shape.
+**OBJECTIVE:** Bootstrap a compliant, project-scoped commercialization environment using Claude Code's native architecture (`CLAUDE.md`, slash-invocable workflows, native custom agents in `.claude/agents/`, and plugins), optimized for long-running marketing operations with built-in drift resistance (especially positioning drift), independent review, evidence-anchored strategy, truth-of-claim reconciliation against the running product, optional live cross-rig coordination via [LLM Bus](https://llm-bus.com), and cross-rig portability.
+**CONSTRAINT:** Use only documented Claude Code formats. No non-native control files. The substrate deliberately mirrors the Claude Code Genesis Protocol v1.7 so code projects and commercialization projects share the same shape.
 
-**THE CURRENCY RULE (load-bearing, shared with v1.4):** This protocol pins the *structural contract*: where files live, what sections exist, how the loop closes. Feature-level details - skill/agent frontmatter keys, hook event names, the bundled-skill inventory, plugin/marketplace commands, and the external knowledge-format spec (OKF, the optional knowledge layer) - move faster than this document. **At bootstrap, verify those details against their official source before generating files.** Where this document and the current docs disagree on a detail, the docs win; where they disagree on structure, this protocol wins.
+**THE CURRENCY RULE (load-bearing, shared with v1.7):** This protocol pins the *structural contract*: where files live, what sections exist, how the loop closes. Feature-level details - workflow/agent frontmatter keys, hook event names, the bundled-skill inventory, plugin/marketplace commands, the external knowledge-format spec (OKF), **and the bus tool surface (§13)** - move faster than this document. At bootstrap, verify those details against their official source; for the bus, the official source is the live `guide()` the bus itself serves. Docs win on details; this protocol wins on structure.
 
-**SCOPE:** One protocol instance is bootstrapped per product or service. A multi-product company runs multiple instances.
+**SCOPE:** One protocol instance per product or service. A multi-product company runs multiple instances.
 
 **OPERATOR-WIDE RULES (apply to this document and everything it generates):**
 - No em dashes (U+2014). Hyphens and double-hyphens only.
-- **Working language:** the operator's working language governs all generated content (an engagement may run entirely in a non-English language). The protocol's structures, filenames, and section keys are language-neutral and stay as written.
+- **Working language:** the operator's working language governs all generated content; structures, filenames, and section keys stay as written.
 
 ---
 
-## What changed in v0.5 (and why)
+## What changed in v0.9 (and why)
 
-v0.5 is a single additive change on top of v0.4; every v0.4 construct stands. It mirrors claude-code v1.4: an optional, conditional **OKF-shaped knowledge layer** for knowledge a marketing engagement accumulates beyond `strategy.md`, the `brand/` kernel, and the decision spine - operational runbooks (launch checklists, channel playbooks), a campaign/domain glossary, evolving spec-like references, current-state notes. A solo or small engagement keeps `strategy.md` + `brand/` + `docs/decisions/` and adds no wiki (an unused wiki is drift).
+v0.9 is the compression + bus-v2 release: the same governance guarantees on a fraction of the always-loaded context, on the coordination layer that actually exists. Three facts drove it.
 
-The wiki is an OKF directory - typed markdown nodes with YAML frontmatter, a reserved index, a reserved change-log, markdown cross-links forming a knowledge graph. The Currency Rule governs the OKF dependency: pin the structure, verify the current OKF spec (reserved filenames, frontmatter fields, `type` vocabulary) against the upstream source at setup, never hardcode the v0.1 field list. This unifies the FORMAT of any knowledge layer without forcing a purpose: `funnel/funnel-map.md` and the `evidence/` index are recognized as already OKF-shaped in spirit. The substrate stays in lockstep with claude-code (now v1.4).
+**First, the bus moved.** The coordination layer's v2 migration (2026-08-11) retired the v1 review surface - `review()`, `answer_review`, the ack step, and the review_requested/review_answered states are gone (calling one returns a redirect) - and replaced it with decisions-as-tasks on the task graph. v0.8's §13, its /produce approval-pending wiring, its §15 ASK tier, and its migration companion were load-bearing on the retired names within days of shipping. v0.9 rewrites all of it on the v2 contract and, more durably, brings bus mechanics under the Currency Rule: CLAUDE.md carries the coordination CONTRACT; generic mechanics are pulled from the bus's own live `guide()`, so the next bus migration is absorbed by re-pulling the guide, not by hand-patching every fork.
 
-For the v0.1 -> v0.4 lineage - the LLM Bus coordination model, ceremony-scales-with-the-bet, `brand/guardrails.md`, the regulated-claim checklist, event-driven freezes, the LIVE-product mirror rule, and the validated v0.4 constructs not to redesign - see the prior version files.
+**Second, the always-loaded file is a budget, and the sibling fleet proved it.** Field measurement (2026-08-13) found five production marketing rigs' CLAUDE.md files at 144-260 always-loaded lines - healthier than the dev fleet's 201-711, but the same fork-rot class: v0.8-lineage text mandating retired bus tools, and the platform's documented adherence penalty applying past ~200 lines. v0.9 adopts the sibling release's attention budget with teeth, one-rule-one-home, and scars-as-tagged-rules.
+
+**Third, the operators retired the clock.** Two marketing rigs' operators independently killed clock-driven coordination crons (a timer wake-up cuts across flow; the bus pushes open work). The event-driven loop - check the board at task boundaries, the end-of-work check is where the next thing comes from - becomes the §13/§15 operating model; the hourly-while-idle backstop is retired.
+
+The changes, mirrored family-appropriately from claude-code v1.7:
+
+1. **Attention budget with teeth:** the generated CLAUDE.md targets ~120 lines solo / ~180 coordinated; a pack-supplied check warns above 200 and fails above the recorded ceiling (default 250); the per-line deletion test is the standing maintenance rule; the load discipline names where every rule lives.
+2. **One rule, one home:** each rule has one canonical section; everything else cross-references. The hard line lives in §13; §15 and Appendix B point at it.
+3. **Scars compress to tagged rules:** a rule keeps a one-clause incident tag; stories, dates, and correction histories live in decision files and `operator/rulings.md`.
+4. **§13 rewritten on bus v2, contract-only:** decisions are tasks with options assigned to whoever decides (the operator answers from the web Board); dependencies derive blocking and auto-unblock with the answer delivered; reading a post marks it read; the board is flushable and rebuilt from the pack ledger, never the reverse. Generic mechanics defer to the live `guide()`.
+5. **The board is the loop:** event-driven checks at task boundaries; no clock crons; a quiet board with nothing buildable becomes a decision task, then stop.
+6. **Capability naming hardened:** this family's workflow surfaces (/produce, /motion, /strategize, /deliver, /coordinate) are generated repo files and safe to name; everything harness-supplied is conditional or re-checked.
+7. **Native-first calibration:** the protocol stops re-teaching native behavior and drops emphasis language; the family floor - reconcile-before-claim, the regulated-claim checklist, gates that never silently pass, the evidence discipline, the ours/client split and freeze rule, the operator ledger, the hard line, off-agent gates - is explicit and never cut on "the model is smart now".
+8. **Test-then-delete, measured:** the migration companion records each rig's before/after sizes and field-tested removals; recurrence evidence feeds the next version.
+
+Everything the v0.7 rebalance and v0.8 fold validated otherwise stands. For the v0.1 -> v0.8 lineage, see the prior version files.
 
 ---
 
-## Relationship to Claude Code Genesis Protocol v1.4
+## Relationship to Claude Code Genesis Protocol v1.7
 
-This protocol is the commercialization sibling of v1.4. The substrate (filenames, directory casing, decision convention, skills/agents formats, settings, hooks, the Currency Rule, the optional LLM Bus coordination model and its bus-vs-git division of labor, and the optional OKF knowledge layer) is shared. What differs:
+This protocol is the commercialization sibling of v1.7. The substrate (filenames, directory casing, decision convention, workflow/agent formats, settings, hooks, the Currency Rule incl. its bus extension, the operator ledger, the attention budget, the optional LLM Bus coordination model, and the optional OKF knowledge layer) is shared. What differs:
 
-- v1.4 locks **architecture**; this protocol locks **strategy** (positioning, ICP, value props, channels, pricing, voice).
-- v1.4 verifies via deterministic **tests, lint, format**; this protocol verifies via **brand + claims compliance** plus **pre-registered experiment decision rules** (scaled to bet size).
-- v1.4 uses the built-in `/feature` pipeline for larger features; this protocol ships `/motion` (bets) and `/produce` (production/ops).
-- v1.4 has no evidence ledger; this protocol adds `evidence/` (inside the pack), including the running product's own code/config as a citable source.
-- Both share the optional OKF knowledge layer; in this protocol the wiki lives in the pack (e.g. `<pack>/wiki/`) and holds marketing runbooks, playbooks, and the glossary.
+- v1.7 locks **architecture**; this protocol locks **strategy** (positioning, ICP, value props, channels, pricing, voice).
+- v1.7 verifies via deterministic **tests, lint, format**; this protocol verifies via **brand + claims compliance**, **truth-of-claim reconciliation**, and pre-registered experiment decision rules (scaled to bet size).
+- v1.7's generated volatile blocks and executed live-claims have no direct marketing mirror - packs have no build; the served product is reconciled via reconcile-before-claim and confirm-live instead.
+- Neither family assumes a bundled pipeline skill exists (v1.7's capability rule); this family's engine is its own generated workflows: `/produce` (the main loop) and `/motion` (the bet pipeline, the special case) - repo files, safe to name.
+- v1.7 has no evidence ledger; this protocol adds `evidence/` (inside the pack), including the running product's own code/config as a citable source.
+- Both share the optional OKF knowledge layer; here the wiki lives in the pack and holds marketing runbooks, playbooks, and the glossary.
 
 ---
 
 # PHASE 0: FORMAT CONTRACT
 
-Identical to v1.4's Phase 0 except where marked. Where a detail is volatile, the Currency Rule applies: verify at bootstrap.
+Identical to v1.7's Phase 0 except where marked; the Currency Rule applies to every volatile detail.
 
-## 1. CLAUDE.md FORMAT
-Native instruction file, auto-loaded, no frontmatter, plain markdown. One root `CLAUDE.md`, kept under roughly 200 lines (use `@path` imports for long material). **It is ours and client-agnostic** - the project binds via a thin header; client rules live in the pack. Do not modify `~/.claude/CLAUDE.md` during bootstrap.
+## 1. CLAUDE.md AND THE ATTENTION BUDGET
+Native instruction file, auto-loaded every session - a spent resource, not a free one (documented behavior: the file loads in full; longer files reduce adherence; an over-specified file gets ignored in parts). **It is ours and client-agnostic** - the project binds via a thin header; client rules live in the pack.
 
-## 2. SKILL FORMAT (`.claude/skills/<name>/SKILL.md`)
-One directory per skill; `SKILL.md` with YAML frontmatter (`description` required - it is the dispatch surface; `allowed-tools` scoped tightly; verify the current key set at bootstrap). Body sections: When to use / How to use / Verification / Failure modes / Outputs. Skills are **ours and client-agnostic**: they reference structure by role ("the live pack's `strategy.md`"), never a hardcoded client name or prohibited-claim list (those live in the pack). `WebSearch`/`WebFetch` are available for evidence gathering; scope per skill. `.claude/commands/` is honored legacy; do not generate new command files.
+- **Budget:** the generated CLAUDE.md targets ~120 lines (solo) / ~180 lines (coordinated, all conditional sections on). A pack-supplied check (Phase 3) WARNS above 200 lines and FAILS above the recorded ceiling (default 250). Raising the ceiling is a decision, not an edit.
+- **The deletion test (standing maintenance):** for each line - would removing it cause a wrong action? If not, cut it.
+- **The load discipline:** a rule lives in CLAUDE.md only if it must bind every turn (the non-negotiables, authority boundaries, active conventions). Everything else lives on a surface structurally loaded when it matters: agent files (load at spawn), workflow files (load on invocation), pack files read at task time (strategy.md, brand/, gates.md - the workflows mandate reading them), scripts (run in checks), hooks/settings (enforce deterministically), decision files (linked from the rule they justify). Never a passive reference file the model must remember to read. `@path` imports expand at launch and save nothing.
+- Do not modify `~/.claude/CLAUDE.md` during bootstrap.
 
-## 3. AGENT FORMAT (`.claude/agents/<name>.md`)
-One file per agent: frontmatter (name, description, scoped tools - verify keys at bootstrap), body = the agent's system prompt. Agents run isolated from the parent's reasoning and chat context; this is the segregation-of-duties mechanism. The commercialization reviewers (Phase 6) are: planning-shaped (strategist, experiment-designer), exploration-shaped incl. reading the sibling product repo read-only (researcher, reconcile, coherence-auditor), and adversarial (brand-reviewer, critic).
+## 2. WORKFLOWS, AGENTS, SETTINGS
+**Workflows:** expose Phase 7 via whatever slash-invocable surface the runtime prefers (Currency Rule; the contract - when to use / how / verification / failure modes / outputs - matters more than the format). Ours and client-agnostic: reference structure by role ("the live pack's `strategy.md`"), never a hardcoded client name. Existing `.claude/commands/` files are honored legacy.
 
-## 4. SETTINGS FORMAT
-As v1.4: `permissions` with `allow`/`ask`/`deny` scoped to actual needs (broaden deliberately; prefer sandboxed/auto modes for autonomous work - verify names at bootstrap); hooks sparingly. The validated reminder hook for this protocol:
+**Agents** (`.claude/agents/<name>.md`): frontmatter (name, description, scoped tools - verify keys at bootstrap), body = system prompt, isolated from the parent's reasoning - the segregation-of-duties mechanism. The reviewers are planning-shaped (strategist, experiment-designer), exploration-shaped incl. reading the sibling product repo read-only (researcher, reconcile, coherence-auditor), and adversarial (brand-reviewer, critic). Client-agnostic bodies; pass only needed facts; findings are authoritative (dismissal requires written justification in PLAN.md Key Insights or the asset's REVIEW.md).
 
-```json
-{
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo '[hook] Asset or doc changed -- run /brand-reviewer (voice, claims, guardrails) before shipping; keep the live pack strategy.md + brand/ and the root PLAN.md in sync; if a launch-relevant fact changed, update the pack gates.md + coordination/.'"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
+**Settings:** `permissions` with allow/ask/deny scoped to actual needs; hooks sparingly - CLAUDE.md is advisory context, hooks are deterministic enforcement. The validated PostToolUse reminder (asset/doc changed -> run /brand-reviewer, keep strategy.md + brand/ + PLAN.md in sync, update gates/coordination, queue operator calls) stays. Where §13 exists, bus tools follow the §13 permission split; SessionStart/Stop hooks make the §13 board checks structural where the harness supports them. `.claude/settings.local.json` gitignored.
 
-`.claude/settings.local.json` for per-developer overrides and tokens; gitignored.
+## 3. MEMORY
+Native auto-memory is the operator-preference layer. Norm-level memories age well; fact-level memories rot - a memory naming a file, flag, or rule is verified against the repo before acting on it. PLAN.md Key Insights is the cross-rig record; operator rulings live in the pack's `operator/rulings.md`, never in memory.
 
-## 5. SUBAGENT EXECUTION RULES
-As v1.4: pass only needed facts (briefs, asset text, the pack's `strategy.md`/`brand/`, relevant evidence, persona descriptions) - never drafting reasoning or chat history; adversarial stance for reviewers; findings authoritative (dismissal requires written justification in `PLAN.md` Key Insights or the asset's `REVIEW.md`).
+## 4. MODEL-TIER CALIBRATION
+The protocol assumes a current frontier model and does not re-teach native behavior: no plan-mode coaching (native; the strategist agent exists for independent strategy-deep plans, a bias question, not a skill question), no in-session task-tracking mandates (native, never the record - PLAN.md is), no emphasis capitals. Rules are stated plainly, once.
 
-## 6. MEMORY AND SESSION STATE
-As v1.4: native auto-memory is complementary and machine-local; `PLAN.md` Key Insights is the mandated cross-rig record. Checkpoints are session-local; git discipline unchanged. Native plan mode complements, never replaces, the strategist agent for strategy-deep plans.
+The calibration has a floor. Rules encoding **authority** (who may consent: the operator ledger, gates, off-agent gates, the hard line), **cross-rig convention** (the coordination contract, claim(), one-token-one-identity, fail-open), or **world-side traps** (truth-of-claim gaps, regulated claims, git semantics, staleness) are orthogonal to model capability and are never cut on "the model is smart now". A smarter model ships the unsupported claim more fluently; capability does not supply consent, and it does not make a false claim true.
 
 ---
 
 # PHASE 1: DISCOVERY AND STRATEGY LOCK
 
-Do not create files yet. Ask the user:
+Do not create files yet. Ask the user (batch; the working language governs all content):
 
-1. **The offer:** product/service, what it does, what it costs, who delivers it. **And the working language** of the engagement (all content follows it).
-2. **Project short-name:** a filesystem-safe slug for the pack folder (`in-progress/<project>-001/`).
-3. **Stage:** pre-launch, launching, early traction, scaling, repositioning, sunsetting.
-4. **Commercial goals:** revenue, customer count, segment penetration, category, exit-narrative + timeline.
-5. **Existing evidence:** interviews, sales transcripts, win/loss, tickets, NPS, prior campaign results + location.
-6. **Operator model:** solo, +AI agents, +contractors, in-house team. Affects production load + reviewer rigor.
-7. **Brand status:** existing voice/visual or from scratch; where it lives; any canonical brand source to sync back to.
-8. **Regulatory + claims constraints:** regulated industry, restricted claims, jurisdictional rules, partner approvals. **If regulated-adjacent, name who gives legal sign-off and on what** - this becomes a launch gate and seeds the regulated-claim checklist (§04).
-9. **Budget envelope:** paid media, tooling, content production. (Also calibrates how heavy the experiment/critic machinery should run - §03.)
-10. **Source/product repo:** if the thing being marketed has a separate code/product repo, note its path and that it is **read-only** from this workspace.
-11. **Sibling rig + live coordination (optional).** Default: none - a solo project skips everything here. Is there a separate product/dev team or agent we coordinate with continuously? If yes: where is their repo, where do they read handoffs, where do we read replies, what change-ID scheme do they use - this seeds the `coordination/` contract. **And: will both sides run agents?** If yes, connect both to LLM Bus (the optional setup in Phase 7; lanes `<product>-<role>`); the contract + append-only log are created regardless (they are the archive + fallback). A partner can be plugged in later via `/coordinate` with no re-bootstrap.
-12. **Launch gates + owners.** What must be true before anything goes public (legal sign-off, payment-processor live, real testimonials, data-path confirmations, measurement instrumentation)? Who owns each? Seeds `gates.md`.
-13. **Locales (optional).** Default single-locale; only if the operator chooses multiple locales do the optional localization conventions turn on.
+1. **The offer:** product/service, what it does, what it costs, who delivers it. And the engagement's working language.
+2. **Project short-name** (filesystem-safe slug for `in-progress/<project>-001/`).
+3. **Stage:** pre-launch, launching, early traction, scaling, repositioning, sunsetting. Stage branches the protocol (§03): pre-launch runs /produce + /coordinate as the main loop with the motion/experiment machinery dormant until a live funnel exists.
+4. **Commercial goals** (revenue, customers, segment, category, exit narrative + timeline). Deliberately deferred goals are recorded parked (owner-gated), never forced into false precision.
+5. **Existing evidence** (interviews, transcripts, win/loss, tickets, NPS, prior campaigns) + location.
+6. **Operator model** (solo / +AI agents / +contractors / in-house) and standing human collaborators: what each produces, what the agent reviews, what channel - seeds human-lane contracts and off-agent gates (§13).
+7. **Operator bandwidth:** decision availability and form, **including the push channel they actually read** (chat, email, digest) - calibrates the ledger cadence, the §13 conventions, and motion parking.
+8. **Brand status:** existing voice/visual or from scratch; where it lives; canonical sync-back source.
+9. **Regulatory + claims constraints;** if regulated-adjacent, who gives legal sign-off and on what (a launch gate + the §04 checklist seed).
+10. **Budget envelope** (also calibrates experiment/critic weight - §03).
+11. **Source/product repo:** path; read-only from this workspace, always.
+12. **Sibling rig + live coordination (optional; default none).** Continuous coordination with a product/dev team or agent? Where is their repo, where do handoffs and replies flow, what change-ID scheme? Will both sides run agents? If yes: LLM Bus setup (Phase 7); the contract + append-only log exist regardless (archive + fallback). A partner is pluggable later via /coordinate.
+13. **Launch gates + owners:** what must be true before anything goes public, and who owns each. Seeds `gates.md`.
+14. **Locale scopes (optional; default single-locale):** marketing-campaign locales, served-product copy locales, legal locales - three independent scopes; non-primary consent/legal strings get a native-speaker + legal pass distinct from brand review.
 
-Then propose **2 candidate positioning angles** (category; target segment + primary JTBD; core value prop; competitive frame; top 3 proof points needed; GTM motion implied). Ask the user to pick or refine. Wait. The chosen angle becomes `docs/decisions/001-<slug>.md`, written in Phase 3.
+Then propose **2 candidate positioning angles** (category; segment + JTBD; core value prop; competitive frame; top 3 proof points; implied GTM motion). Ask the user to pick or refine. Wait. The choice becomes `docs/decisions/001-<slug>.md` (Phase 3).
 
 ---
 
 # PHASE 2: SCAFFOLDING
 
-Create the directory structure only. **Ours at the root; the client pack under `in-progress/`.**
+Directory structure only. **Ours at the root; the client pack under `in-progress/`:** `.claude/` (+ the workflow surface dir, `agents/`), `docs/decisions/`, `scripts/`, `locked/`, `archive/`, and `in-progress/<project>-001/` with `operator/`, `evidence/` (customers/ competitors/ market/ product/ experiments/), `brand/` (+ `workshop/`), `acquisition/`, `landing-pages/`, `funnel/`, `messaging/`, `ads/`, `content/`, `decks/`, `emails/`, `delivery/`, `explorations/`, and `coordination/` ONLY if a partner rig or human lane exists. Channel-specific areas (app-store/, legal/) are expected growth, noted in the pack README when they appear.
 
-```
-.claude/
-.claude/skills/
-.claude/agents/
-docs/
-docs/decisions/
-scripts/
-in-progress/
-in-progress/<project>-001/
-in-progress/<project>-001/evidence/
-in-progress/<project>-001/evidence/customers/
-in-progress/<project>-001/evidence/competitors/
-in-progress/<project>-001/evidence/market/
-in-progress/<project>-001/evidence/product/
-in-progress/<project>-001/evidence/experiments/
-in-progress/<project>-001/brand/
-in-progress/<project>-001/landing-pages/
-in-progress/<project>-001/funnel/
-in-progress/<project>-001/messaging/
-in-progress/<project>-001/ads/
-in-progress/<project>-001/content/
-in-progress/<project>-001/decks/
-in-progress/<project>-001/emails/
-in-progress/<project>-001/coordination/        # OPTIONAL: only if a partner rig is plugged in (now or later)
-in-progress/<project>-001/delivery/
-in-progress/<project>-001/explorations/
-locked/
-archive/
-```
-
-Notes carried from v0.3: `docs/` at the root holds only `decisions/` (and genuinely-ours docs); everything client lives inside the pack; `gates.md` lives in the pack root (Phase 3); `locked/` + `archive/` start empty with short READMEs.
-
-**Storage, sync & naming (carried, validated):** the system of record is a **private GitHub repo per project** (`brand-marketing`); web-optimized derivatives in git, bulk/raw media in Drive or object storage, linked from the pack; deliver audience exports as zips or copied Drive folders (markdown -> formatted Google Doc + self-contained zips via the `gws` CLI; **rename-don't-delete** to deprecate); `private/` gitignored; never commit customer PII; a frozen version = a git tag.
+**Storage, sync, naming (carried, validated):** system of record = a private git repo per project; web-optimized derivatives in git, bulk/raw media in Drive or object storage, linked; audience exports as zips or copied Drive folders (rename-don't-delete); `private/` gitignored; never commit customer PII; a frozen version = a git tag.
 
 ---
 
 # PHASE 3: ROOT FILES, THE PACK, AND THE DOCUMENT SYSTEM
 
-The documents form a **circularity loop that spans both layers** and must never contradict itself. Create:
+The documents form a circularity loop spanning both layers. Create:
 
 ## Ours (repo root)
 
-### 1. `README.md` - workspace overview
-The ours/client split; the layout (live pack named); the **freeze rule** + lifecycle (`in-progress/` -> `locked/` -> `archive/`, event-driven); the operating model (operator, cadence, the two tracks); the sibling-rig coordination model if any; a short "the offer" block pointing at the pack's `strategy.md`. Internal-facing.
+1. **`README.md`** - the ours/client split; layout with the live pack named; the freeze rule + lifecycle (`in-progress/` -> `locked/` -> `archive/`, event-driven); operating model; the coordination model if any; a short offer block pointing at the pack's `strategy.md`.
+2. **`PLAN.md`** - task ledger: Objectives; Milestones (motions with acceptance criteria + decision rules); Bootstrap checklist; Current state; In-flight (the one active motion, or "none / parked: <reason>"); Production/ops queue (the main loop, not throttled); Backlog; Key insights (lessons only). Compaction ritual: completed entries collapse to one line + a link after a few weeks; git holds history.
+3. **`.gitignore`** - standard + `.claude/settings.local.json`, `.claude/worktrees/`, `**/.DS_Store`, vendor credentials, large export artifacts, `private/`.
+4. **`docs/decisions/`** - the governance spine (ours, one copy, cross-version). Files `<NNN>-<kebab-slug>.md`, three-digit, monotonic, never reused; template adds `**Trigger:** marketing | product`; Status vocabulary `Accepted | Refined by NNN | Superseded by NNN | Reversed by NNN`. Decision-required events: positioning/pricing/channel changes, voice or visual/tagline LOCKS (exploration is un-numbered - the lock is the decision), major/regulated claim adoption, killed experiments, structure/governance changes, `Trigger: product` changes (+ the sibling change-ID). Risk-accepted decisions are a typed class: the flagged risk verbatim + a revisit trigger. Cross-rig, cite another rig's decision by number + commit/ref, never number alone. **Indexes and Status headers are checked, not trusted:** the pack supplies its own ~60-line stdlib check that FAILS on an unindexed numbered file or an unreflected supersession declaration; every numbered local sequence gets an allocation gate (claim() for shared sequences per §13; the checked index for local ones). Seed `001` with the positioning choice.
+5. **`scripts/` gains the size check (new in v0.9):** a step in the pack's check script that counts root `CLAUDE.md` lines - warn above 200, fail above the recorded ceiling (default 250). About five lines; mutation-verify it once (a padded file must fail) before trusting it.
+6. **`locked/README.md`** and **`archive/README.md`** - frozen delivery packs / frozen superseded versions; both immutable.
 
-### 2. `PLAN.md` - task ledger
-**Objectives**; **Milestones** (named motions with acceptance criteria + decision rules); **Bootstrap** checklist; **Current state**; **In-flight** (the one in-flight *motion*); **Production/ops queue** (the parallel light-track work, not throttled); **Backlog**; **Key insights**.
+## Client (inside the live pack)
 
-### 3. `.gitignore`
-Standard + `.claude/settings.local.json`; `.claude/worktrees/`; `**/.DS_Store`; vendor credentials; large/derived export artifacts; a `private/` dir for local-only secrets and PII-adjacent source media.
-
-### 4. `docs/decisions/` - the governance spine (ours, one copy, cross-version)
-Per-decision files `<NNN>-<kebab-slug>.md`, three-digit, monotonic, never reused. Template adds `**Trigger:** marketing | product` to the v1.4 structure. A decision is required for: positioning change; pricing change; channel kill/adoption; brand voice change or material visual/tagline change (proposal-layer iterations included - the numbered spine is the audit trail); major/regulated claim adoption; major messaging shift; killed experiment; repo-structure or governance change; a product-side change that forces a marketing change (`Trigger: product` + the sibling change-ID). Decisions are cited **by number** in each pack's `handoff.md`; they never ship inside a pack. `README.md` is the generated index. Seed `001` with the positioning choice.
-
-### 5. `locked/README.md` and `archive/README.md`
-`locked/` holds frozen clean delivery packs; `archive/` holds frozen superseded versions; both immutable.
-
-## Client (inside the live pack `in-progress/<project>-001/`)
-
-### 6. `strategy.md` - single source of strategic truth (living)
-Locked behind the Positioning Lock but living; each material change recorded by a decision. Required sections carried from v0.3: Category; Positioning statement; ICP profile (attributes citing `evidence/`); Segments; Value propositions; Competitive frame; Messaging hierarchy; Brand voice reference; Pricing model (reconciled to the live product config, citing `evidence/product/`); Channel mix; GTM motion; Success metrics (each marked instrumented / not-yet, with the wiring owner); Required Compliance Checks.
-
-### 7. `evidence/` - the evidence ledger
-Every `strategy.md` claim cites at least one file here. Subfolders: `customers/`, `competitors/`, `market/`, `product/` (reconciliation evidence: config snapshots and "claim -> code path @ commit" records), `experiments/` (pre-registered; instrumentation-readiness named; append-only after completion). `evidence/README.md` is the index.
-
-### 8. `brand/` - the brand kernel
-- `voice.md` - tone, do/don't, register, signature phrases, good-vs-bad paragraphs (per-locale notes only if multi-locale).
-- `visual.md` - logo, color tokens with accessible pairs, type, spacing, imagery rules; each element's firmness stated (locked vs proposal-layer).
-- `claims.md` - **what you MAY say**: allowed claims with evidence refs; prohibited/regulated claims with reason; required disclaimers; claims-by-jurisdiction where locales differ; the client's hard rules; the regulated-claim approval workflow with legal sign-off as a named gate and recorded rulings.
-- `guardrails.md` (NEW) - **how you say it**: tone boundaries, framing rules, rhetorical do/don'ts that are not claims. `/brand-reviewer` reads both; claims.md governs permission, guardrails.md governs delivery.
-- `README.md` - index + when each rule binds.
-
-### 9. `gates.md` - the launch-gate register
-Carried verbatim from v0.3 (one row per gate: Gate / Owner (rig) / Blocks / Status / Cleared-by evidence; legal rulings appended verbatim to the cited evidence file; cross-rig gates mirrored in `coordination/`).
-
-### 10. `handoff.md` + `delivery/` - the multi-target delivery model
-Carried from v0.3: `handoff.md` is the index and "what's in the box" - delivery only, never a conversation log. `delivery/` holds one self-contained audience-scoped export per consumer (agency-enablement, developer-handback, creator/partner-kit, client-review-export), decisions cited by number, honesty markers mandatory.
-
-### 11. `coordination/` - the cross-rig channel (OPTIONAL)
-A solo project has no `coordination/` folder and ignores this section; a partner is pluggable later via `/coordinate`. When a partner rig exists, the channel model is:
-
-- **The bus is the live channel.** When both rigs run agents, handoffs, asks, acks, and presence flow over LLM Bus (posts referencing commits/files; acks as read receipts). A cross-rig ask that sat unacknowledged for days in a git file gets an ack in minutes when both agents are active.
-- **`<rig>-contract.md`** - the sync protocol, agreed once: where each side pushes, where replies are read, cadence, the change-ID schemes both cite, **which sequences are shared vs per-rig-local** (see CLAUDE.md §13), lane names, and the standard rule: **the LIVE product is the source of truth for served surfaces - marketing's design files are the source until shipped, then a dated read-only mirror.**
-- **`<rig>.md`** - the **append-only log: durable archive + fail-open fallback.** Load-bearing outcomes (handoffs accepted, gates moved, rulings) are archived here; it is the channel when the bus is down. Do not narrate the same handoff twice - the post points at the committed file; the archive records the outcome.
-
-### 12. Asset folders + `explorations/`
-Carried from v0.3: every asset (or motion folder) carries a sibling `BRIEF.md` (full for bets; DoD-lite for light-track) and a `REVIEW.md`. No asset without a brief. Multi-locale assets use paired naming. `explorations/` holds non-promoted work, never deleted to tidy up.
-
-### 13. `funnel/funnel-map.md` - the funnel + cross-channel bridge (FIRST-CLASS)
-**Mandatory for any engagement coupled to a running product.** Maps the live conversion funnel end to end, traces each step to the actual page/route/config in the product repo, and states where the core marketing applies. Funnel-shape-agnostic (classic web and conversational/chat-first both first-class). Reconcile to the running product **continuously**: pull pricing, trial, plan names, channel from the real config (citing `evidence/product/`), flag drift, and open a `Trigger: product` decision when the product moves a marketing fact.
-
-### 14. `wiki/` - the knowledge layer (OPTIONAL, OKF-shaped)
-Skip for a small engagement: `strategy.md` + `brand/` + `docs/decisions/` suffice, and an unused wiki is drift. Adopt it WHEN the engagement accumulates knowledge that fits none of those - launch runbooks, channel playbooks, a campaign/domain glossary, current-state and how-it-works notes. Structure it per the Open Knowledge Format: typed markdown nodes with YAML frontmatter (minimum a `type` field), a reserved index node, a reserved change-log node, markdown cross-links forming a knowledge graph. **Currency Rule: verify the current OKF spec (reserved filenames, frontmatter fields, `type` vocabulary) against the upstream source (`github.com/GoogleCloudPlatform/knowledge-catalog`, the `okf` spec) at setup; never hardcode the v0.1 field list.** Division of labor: `strategy.md` + `brand/` = the locked strategic contract; `docs/decisions/` = the immutable rationale spine; the wiki = mutable current-state; LLM Bus = live coordination; `coordination/<rig>.md` = coordination archive. Do not duplicate a fact across layers - link to a decision, never restate it. Format-not-purpose: `funnel/funnel-map.md` and `evidence/README.md` are already OKF-shaped in spirit; adopting OKF unifies the format, not their purposes. Record the adoption and the verified OKF spec revision in a decision; generate CLAUDE.md §14.
+7. **`operator/`** - the operator ledger (first-class; operator attention is the engagement's bottleneck resource). **`open-items.md`**: the standing numbered queue of decisions only the operator can make - what / why / options with a recommendation; answered by number; owner-gated work parks against its number, never silently proceeds, never silently drops; every working session ends by refreshing it. **Where a bus exists (§13), an open item also files as a decision task assigned to the operator: one item, two jobs - the task delivers and tracks state on the Board; the entry holds the reasoning, options, and recommendation (and survives a bus flush); the task cites the item number.** **`rulings.md`**: append-only dated one-liners (`ruling <date>-<n>`); check it before asking the operator anything; a ruling that grows into a strategic fact graduates via the normal decision path.
+8. **`strategy.md`** - single source of strategic truth, locked behind the Positioning Lock but living; each material change by decision. Sections: Category; Positioning statement; ICP profile (citing `evidence/`); Segments; Value propositions; Competitive frame; Messaging hierarchy; Brand voice reference; Pricing model (reconciled to the live product config); Channel mix; GTM motion; Success metrics (each marked instrumented / not-yet, with the wiring owner); Required Compliance Checks. Deferred sections are parked (owner-gated) with their open-item number. Satellites cite strategy.md, never restate it.
+9. **`evidence/`** - the evidence ledger; every `strategy.md` claim cites at least one file here. `product/` holds reconciliation evidence ("claim -> code path @ commit"); `experiments/` is pre-registered, append-only after completion, numbered through its checked index.
+10. **`brand/`** - the brand kernel: `voice.md`; `visual.md` (firmness per element: locked vs proposal-layer); `claims.md` (the standing claims ledger: allowed with evidence refs, prohibited/regulated with reason, disclaimers, per-jurisdiction where locales differ, the regulated-claim workflow with legal sign-off as a named gate, durable rulings per claim family); `guardrails.md` (how you say it - tone boundaries, framing rules; claims.md governs permission, guardrails.md governs delivery); `workshop/` (the visual sandbox; self-contained HTML previews are a first-class asset type; exploration un-numbered, the lock is the decision); `README.md`. **Media/visual rules (canonized):** never invent product visuals; authentic-UI depictions come from the product's real CSS/build; real captures beat mockups once a capture harness exists; third-party marks are a standing trademark-review trigger.
+11. **`gates.md`** - the launch-gate register: Gate / Owner / Blocks / Status / Cleared-by evidence. Status vocabulary: OPEN, CLEARED (linked evidence), WAIVED (scope + who), RISK-ACCEPTED (linked to its typed decision), PARKED (owner-gated - waiting on an open-item and, where a bus exists, its decision task). A waiver is never a silent clear.
+12. **`handoff.md` + `delivery/`** - the multi-target delivery model: `handoff.md` is the index, delivery-only; `delivery/` holds one self-contained audience-scoped export per consumer, decisions cited by number, honesty markers mandatory.
+13. **`coordination/`** (OPTIONAL - only when a partner rig or standing human collaborator exists): `<rig>-contract.md` (the sync protocol: push/read locations, cadence, change-ID schemes, shared-vs-local sequences, lanes, write-authority per peer, the decision-task conventions + the operator's named push channel, and the standing rule: the LIVE product is the source of truth for served surfaces - marketing's design files are the source until shipped, then a dated read-only mirror); `<human>-lane.md` contract-lites (what they produce, what the agent reviews - typically compliance re-review, nothing else - and any off-agent gates the agent must not leak into); `<rig>.md` (the append-only log: durable archive + fail-open fallback; load-bearing outcomes land in whichever durable repo file is their natural home - never narrated twice).
+14. **Asset folders + `acquisition/` + `explorations/`** - every asset carries a sibling `BRIEF.md` (full for bets; DoD-lite for the main loop) and a `REVIEW.md`; no asset without a brief; multi-locale assets use paired naming. `acquisition/` is the motion-shaped growth area; its strategy satellite cites strategy.md. `explorations/` holds non-promoted work, never deleted to tidy up.
+15. **`funnel/funnel-map.md`** - MANDATORY for any engagement coupled to a running product: maps the live conversion funnel end to end, traces each step to the actual page/route/config, states where the core marketing applies; funnel-shape-agnostic; reconciled continuously (drift opens a `Trigger: product` decision).
+16. **`wiki/`** (OPTIONAL, OKF-shaped) - adopt when the engagement accumulates knowledge that fits neither strategy.md + brand/ nor decisions (runbooks, playbooks, glossary, current-state); an unused wiki is drift. Typed markdown nodes (frontmatter with at least `type`), reserved index + change-log nodes, cross-links as the graph, a declared lifecycle per node cluster (intent, not a control). Currency Rule: verify the current OKF spec upstream at setup. One source of truth per concern; link to a decision, never restate it. The `/strategize` standing artifacts are a recognized slow-living cluster here. Record adoption + spec revision by decision; generate §14.
 
 No `AGENTS.md`, no `GEMINI.md`. The native instruction file is `CLAUDE.md` (Phase 4).
 
@@ -206,249 +144,220 @@ No `AGENTS.md`, no `GEMINI.md`. The native instruction file is `CLAUDE.md` (Phas
 
 # PHASE 4: CLAUDE.md - CORE RULE SYSTEM (ours, client-agnostic)
 
-Create a single root `CLAUDE.md`. The body is generic; a thin header binds it to the project (fill `<project>`, the live pack path, the read-only product repo path if any, the coordination path if any). Sections 00-12, plus §13 only if a live-coordinated partner rig exists, plus §14 only if a knowledge wiki was adopted.
+Create a single root `CLAUDE.md`: a thin header binds the project (fill `<project>`, the live pack path, the read-only product repo path, the coordination path if any); the body is generic. Sections 00-12, plus §13 only if a live-coordinated partner or human lane exists, §14 only if a wiki was adopted, §15 only if scheduled/unattended sessions run. The result lands inside the Phase 0 budget; omit what does not apply rather than carrying dead weight.
 
 ```markdown
 # Commercialization workspace - operating rules
 
-This file and `.claude/` are **ours**: the generic commercialization method, reused across projects. They carry **no client-specific content** - client strategy, evidence, brand, claims, gates, coordination, and assets live in the live pack. Client specifics leaking into this file or `.claude/` is drift; fix by moving them into the pack.
+This file and `.claude/` are ours: the generic method, reused across projects, carrying no client content - client strategy, evidence, brand, claims, gates, rulings, coordination, and assets live in the live pack. Client specifics leaking into this file is drift; fix by moving them into the pack.
 
-**This workspace: <project> commercialization.** Live pack: `in-progress/<project>-001/` (open its `handoff.md`). [If applicable: the product lives at `<path>` - read-only; never edit it.] The client's hard rules live in the pack's `brand/` + `strategy.md` + the decision log - read them before producing.
+**This workspace: <project> commercialization.** Live pack: `in-progress/<project>-001/` (open its `handoff.md`). [If applicable: the product lives at `<path>` - read-only; never edit it.] The client's hard rules live in the pack's `brand/` + `strategy.md` + `operator/rulings.md` + the decision log - read them before producing.
 
-## Repo structure
-**Ours (root, never shipped):** this file, `.claude/`, `PLAN.md`, `README.md`, `scripts/`, `docs/decisions/` (the governance spine, cited by number, never shipped).
-**Client (versioned, self-contained packs):** `in-progress/<project>-NNN/` holds `strategy.md`, `evidence/`, `brand/` (incl. `guardrails.md`), `gates.md`, the asset folders, `funnel/`, `delivery/`, `handoff.md`, `explorations/`, and (only if a partner rig is plugged in) `coordination/`.
-**Lifecycle + freeze rule:** `in-progress/` = the one live pack; `locked/` = frozen delivery packs; `archive/` = frozen superseded versions. Exactly one live version at a time; locked/archive immutable.
-
-> Throughout, **"the pack"** = the live pack `in-progress/<project>-NNN/`.
+**Repo structure:** ours at root (this file, `.claude/`, `PLAN.md`, `README.md`, `scripts/`, `docs/decisions/` - the governance spine, cited by number, never shipped); client in versioned self-contained packs under `in-progress/` (one live), `locked/` (frozen deliveries), `archive/` (frozen superseded) - locked/archive immutable. Throughout, "the pack" = the live pack.
 
 ## 00 - Constitution
+
 High-rigor, long-running commercialization mode.
 
 Non-negotiables (these stay absolute):
-1. **No asset ships without a brief tied to a PLAN.md item** and a `strategy.md` angle.
-2. **No strategic claim without an evidence citation** (claims tagged [hypothesis]/[gap #N] are not yet validated).
-3. **No positioning change without a decision file.**
-4. **Every big bet declares its decision rule before results are seen** - pre-registered in `evidence/experiments/`, with instrumentation-readiness named.
-5. Nothing goes public until the relevant `gates.md` rows are cleared with linked evidence.
-6. Regulated claims follow the §04 checklist without exception.
+1. **Reconcile before claim.** The biggest claims risks are truth-of-claim gaps between marketing text and product behavior. Product-factual claims (pricing, trial, plan names, channel, privacy/data path) are verified against the running product's actual config/code before shipping ("claim -> code path @ commit" in `evidence/product/`).
+2. No asset ships without a brief tied to a PLAN.md item and a `strategy.md` angle.
+3. No strategic claim without an evidence citation ([hypothesis]/[gap #N] tags mark the unvalidated).
+4. No positioning change without a decision file.
+5. Every big bet declares its decision rule before results are seen (pre-registered in `evidence/experiments/`).
+6. Nothing goes public until the relevant `gates.md` rows are CLEARED or explicitly WAIVED/RISK-ACCEPTED with scope recorded. A parked or open gate never silently passes.
+7. Regulated claims follow the §04 checklist without exception.
+8. Operator attention is the bottleneck: decisions only the operator can make go to `operator/open-items.md` (numbered; where a bus exists, also filed as a decision task - §13); answers land in `operator/rulings.md`; check rulings before re-asking anything.
 
-Operational rules:
-7. Keep the pack consistent with its `strategy.md` and `brand/`; run /brand-reviewer after asset changes (it reads claims.md AND guardrails.md); never ship without it passing.
-8. Do not broaden scope without updating PLAN.md and the brief.
-9. On repeated failure: stop, diagnose root cause, revise strategy or brief, then proceed.
+Rule-writing principle: rules scoped to concrete triggers, sizes, or surfaces get followed; absolutes get rationally bent. Scope every new rule to the event that makes it matter.
 
-Operator-wide rules: no em dashes (U+2014) in any output; the engagement's working language governs all content; client hard rules live in the pack, not here.
+Attention budget: this file is loaded every session and budgeted (warn 200 lines, fail <ceiling> - the pack's check script enforces). One rule, one home; cross-reference, never restate. A rule earns its place by the deletion test. A new scar lands as a one-clause incident tag plus a decision file holding the story, same commit - never a narrative paragraph here.
 
-Document circularity mandate:
-Every shipped asset traces to a BRIEF.md (pack); every brief to a PLAN.md item (root) and a strategy.md angle (pack); every strategy claim to an evidence file (pack, incl. the running product's code/config); every strategic change to a decision (root, cited by number in the pack's handoff.md); every public launch to cleared gates (pack); cross-rig dependencies to coordination (pack). No document may contradict another; resolve contradictions immediately.
+Document circularity: every shipped asset traces to a BRIEF.md; every brief to a PLAN.md item and a strategy.md angle; every strategy claim to an evidence file; every strategic change to a decision (cited by number in the pack's handoff.md); every operator call to an open-item or ruling; every public launch to cleared-or-waived gates; cross-rig dependencies to coordination. No document may contradict another; resolve contradictions immediately.
 
 ## 01 - Strategy Gate
-Before any motion launch or change to the pack's `strategy.md`, produce a Strategy Plan via the strategist agent: goal/non-goals; segment + JTBD with citations; positioning angle + primary message (must match the lock); channels + sequencing; asset list with one-line briefs; primary metric + decision rule + instrumentation status (bets); risks; verification plan.
 
-Threshold: the gate governs motions and strategy-touching work. A copy tweak, a single-line claim fix, or an ops/coordination task does not get a strategist round-trip - /brand-reviewer is the gate for those (it still runs on anything shippable). If the edit touches positioning, category, ICP, pricing, or a regulated claim, it is never trivial.
+Before any motion launch or `strategy.md` change: a Strategy Plan via the strategist agent (goal/non-goals; segment + JTBD with citations; angle + primary message matching the lock; channels + sequencing; asset list; metric + decision rule + instrumentation status for bets; risks; verification plan). The initial strategy and each re-diagnosis come from the `/strategize` workshop feeding the locked `strategy.md`; the strategist plans per-motion within that lock.
+
+Threshold: the gate governs motions and strategy-touching work; a copy tweak or ops task gets /brand-reviewer only. An edit touching positioning, category, ICP, pricing, or a regulated claim is never trivial.
 
 ## 02 - Positioning Lock
-Positioning is locked after the pack's `strategy.md`.
-1. No change to the positioning statement, category, ICP, or competitive frame without a decision file first and `strategy.md` updated in the same commit.
-2. No new value props/proof points without an evidence file.
-3. No new claims (especially regulated) without `brand/claims.md` entries + evidence + a cleared legal gate where required.
-4. Prefer message iteration within the locked positioning over rewrites.
-5. Brand-layer firmness (locked vs proposal-layer) is recorded in the pack's `brand/`; proposal-layer iterations are cheap but still consume numbered decisions.
 
-## 03 - Task Tracking & the two tracks
-PLAN.md is the durable record (in-session tracking is native tooling; not mandated, never the record). Two tracks:
-- **Motions (strategic bets):** launches, pricing, channel pivots, ICP shifts, positioning, anything experiment-gated. Run /motion. One in-flight motion at a time.
-- **Production/Ops (everything else):** delivery exports, cross-rig coms, reconciliations, routine assets, content. Run /produce (DoD-lite). Not throttled; tracked in the production/ops queue.
+Locked after `strategy.md` exists: no change to positioning, category, ICP, or competitive frame without a decision file and a same-commit strategy.md update; no new value props/proof points without evidence; no new claims without `brand/claims.md` entries + evidence + a cleared legal gate where required; prefer message iteration within the lock over rewrites. Brand-layer firmness lives in `brand/`; exploration is un-numbered - the LOCK is the numbered decision. Deferred sections are parked (owner-gated), never silently filled.
 
-Ceremony scales with the bet: a high-spend or irreversible bet gets the full strategist -> draft -> brand-review -> critic -> experiment chain; a small reversible bet may run a reduced panel (strategist + brand-review + a declared decision rule). The threshold is spend/irreversibility, decided in the BRIEF. "One in-flight motion" governs bets only.
+## 03 - The Two Tracks (production/ops is the engine)
+
+PLAN.md is the durable record (in-session tracking is native and never the record). Two tracks:
+- **Production/Ops (the main loop):** routine assets, copy packs, reconciles, exports, coordination, channel work - run /produce; not throttled. Lifecycle: brief -> draft -> brand-review -> operator-approval-pending (an open-item; where a bus exists, also a decision task assigned to the operator - §13) -> handoff -> confirm-live.
+- **Motions (bets, the special case):** launches, pricing, pivots, positioning, anything experiment-gated - run /motion; one ACTIVE at a time; a motion waiting on the operator or externals is PARKED (with what unblocks it - its open-item number and, where a bus exists, its decision task) and does not block other work. Pre-launch mode: /produce + /coordinate ARE the engagement; motion machinery dormant by design.
+
+Ceremony scales with the bet (spend/irreversibility, decided in the BRIEF). Work-tracker division: the bus task graph = live cross-rig allocation; PLAN.md = the durable logbook; the /strategize action-board GENERATES milestones and tasks, never duplicates them; in-session todos = scratch.
 
 ## 04 - Definition of Done
-**Motion DoD:** (1) /brand-reviewer passes (voice, claims, guardrails, factual accuracy incl. product reconciliation, links, accessibility, positioning alignment, brief integrity, honesty markers, locale correctness); (2) /critic run with the personas the bet size warrants (always include regulator/legal for regulated-adjacent work); findings resolved or accepted-risk-documented in REVIEW.md; (3) BRIEF.md current with metric + decision rule + instrumentation status; (4) no secrets/PII/unapproved claims; (5) docs synced (strategy.md, handoff.md, delivery/, gates.md as relevant); (6) PLAN.md updated; (7) the governance loop internally consistent.
 
-**Production/Ops DoD-lite:** a brief tying it to a PLAN item + a strategy angle; /brand-reviewer passes; honesty markers on stand-ins; gates.md/coordination/ updated if a dependency moved. /critic only if it touches a claim or a public-facing risk.
+**Motion DoD:** /brand-reviewer passes (voice, claims, guardrails, factual accuracy incl. product reconciliation, links, accessibility, positioning alignment, brief integrity, honesty markers, locale correctness, third-party marks); /critic with a panel scaled to the bet (regulator/legal always for regulated-adjacent); BRIEF current with metric + decision rule + instrumentation status; no secrets/PII/unapproved claims; docs synced; PLAN.md updated; the loop consistent.
 
-**Regulated-claim checklist (named, never skippable):** new claim -> (1) check `brand/claims.md` (allowed / prohibited / needs-approval); (2) cite evidence (`evidence/`, incl. `product/` for product-factual claims); (3) if regulated: legal review before ship - the ruling recorded **verbatim** in the cited evidence file; (4) a `gates.md` row whenever sign-off is required.
+**Production/Ops DoD-lite:** a brief; /brand-reviewer passes; honesty markers on stand-ins; gates/coordination updated if a dependency moved; if handed off, confirm-live is a named follow-up. /critic only if a claim or public-facing risk is touched.
+
+**Regulated-claim checklist (never skippable):** check `claims.md` (incl. the claim family's standing rulings) -> cite evidence -> legal review before ship where regulated (the ruling recorded verbatim in the cited evidence file) -> a `gates.md` row wherever sign-off is required.
 
 ## 05 - Verification Mandate
-After any asset change: run /brand-reviewer with the checks in the pack's `strategy.md` + `brand/`; do not proceed on failure. After any experiment: confirm the metric was instrumented; apply the pre-registered decision rule (keep/iterate/kill) without re-litigating; record the lesson in Key Insights. Before any public launch: confirm the relevant `gates.md` rows are cleared.
+
+After any asset change: /brand-reviewer; do not proceed on failure. After a handoff ships: confirm-live against the served product. After an experiment: confirm instrumentation, apply the pre-registered rule without re-litigating, record the lesson. Before any public launch: the relevant gates rows are CLEARED or carry an explicit WAIVED/RISK-ACCEPTED.
 
 ## 06 - Drift Detection
-Eight dimensions: strategy<->assets; plan<->reality; brand<->assets; evidence<->claims (aged/superseded?); positioning<->messaging; decisions<->docs; marketing<->live product (config/claims reconciled?); gates<->reality + coordination<->reality. Run /coherence-auditor on these triggers: post-launch, before a pricing change, before major spend, resuming after a gap, after a sibling-rig shipping spree.
+
+Eight dimensions: strategy<->assets; plan<->reality (parked items still marked); brand<->assets; evidence<->claims; positioning<->messaging; decisions<->docs (Status headers checked mechanically); marketing<->live product; gates + coordination<->reality. Run /coherence-auditor on triggers: post-launch, before pricing changes or major spend, resuming after a gap, after a sibling-rig shipping spree. Memory staleness is a drift source.
+
+The wrong-surface discipline (canonical here, binding on every drift conclusion): before concluding a claim, asset, or fact is absent or stale, name the surface that would show it and check THAT surface (a spec may be merged but unpushed; a claim may live on a SERVED surface, not in the repo; a ruling may live in `operator/rulings.md`, not memory). Every windowed measurement states its window.
 
 ## 07 - Doc Sync
-On change to: public assets/claims -> keep `strategy.md` current; positioning/pricing/channels/GTM -> `strategy.md` + a decision; brand voice/visual/claims/guardrails -> the pack's `brand/` + a decision if material + re-run /brand-reviewer on existing assets; goals/scope -> `PLAN.md` + `README.md`; evidence -> add the file + update the index + re-cite; a launch dependency -> `gates.md`; a cross-rig handover/ask/ack -> the bus, with the outcome archived in `coordination/`; a product change that moves a marketing fact -> reconcile `funnel/` + a `Trigger: product` decision; delivery contents -> `handoff.md` + the relevant export.
+
+Public assets/claims -> strategy.md current; positioning/pricing/channels -> strategy.md + a decision; brand changes -> pack `brand/` (+ a decision if a lock) + re-run /brand-reviewer on existing assets; goals/scope -> PLAN.md + README; an operator answer -> `operator/rulings.md`, close the item, resume the dependent work; evidence -> file + index + re-cite; launch dependencies -> gates.md; cross-rig handoffs -> a bus task with the outcome archived durably; a product change moving a marketing fact -> reconcile funnel/ + a `Trigger: product` decision; delivery -> handoff.md + the export.
 
 ## 08 - Failure Escalation
-/brand-reviewer or /critic fails >2x on the same asset -> Failure Analysis, revise the brief or positioning citation, re-run. Experiment misses -> apply the pre-registered rule ("iterate" = new brief + new rule; "kill" = explorations/ + a decision file). 5+ related misses -> positioning review. A stuck launch gate owned by another rig -> escalate on the bus AND in `coordination/` and to the operator; never silently launch around it. Record escalations in Key Insights.
+
+/brand-reviewer or /critic fails twice on the same asset -> Failure Analysis, revise the brief or citation, re-run. Experiment misses -> apply the pre-registered rule. Five related misses -> positioning review. A stuck gate owned by another rig -> a bus task AND an operator open-item + its decision task; never silently launch around it.
 
 ## 09 - Skill Governance
-Prefer bundled skills and marketplace plugins; add custom skills only for genuine gaps. Never shadow a bundled or reserved name (reserved here: motion, produce, strategist, brand-reviewer, critic, coherence-auditor, researcher, reconcile, experiment-designer, positioning-sprint, repair, deliver, coordinate). Imports must respect the brand files and the evidence pathway; on conflict, local rules win; record low-quality imports in docs/decisions/.
+
+Prefer bundled and marketplace capabilities; custom workflows only for genuine gaps (Currency Rule governs the surface). Never shadow a bundled or reserved name (reserved: motion, produce, strategize, strategist, brand-reviewer, critic, coherence-auditor, researcher, reconcile, experiment-designer, positioning-sprint, repair, deliver, coordinate). Capability naming: this workspace's workflows and agents are repo files, safe to name; harness-supplied capabilities are referenced conditionally or re-checked on the §06 triggers - a mandated step that silently no-ops is worse than no rule. Imports respect the brand files and the evidence pathway; local rules win on conflict.
 
 ## 10 - Git Discipline
+
 1. Branch before non-trivial work: `motion/<slug>` or `produce/<slug>`.
-2. Atomic commits (asset + brief + review + doc updates together). Prefixes: motion:, produce:, strategy:, brand:, evidence:, decision:, delivery:, coms:, gate:, docs:, chore:.
-3. Merge after verification (fast-forward where possible); no direct pushes to main for `strategy.md`, `brand/`, or `docs/decisions/`.
-4. **Freeze rule (event-driven):** freeze on external handoff, repositioning, or a segment launch - not on a calendar cadence. Never edit `locked/` or `archive/`; a frozen version = a git tag; work continues in the next live pack immediately.
-5. Storage as scaffolded: private repo, derivatives in git, bulk media linked, `private/` gitignored.
-6. **Cross-rig:** if a sibling rig reads our repo, commits are part of the channel - write actionable commit messages, and archive anything load-bearing in `coordination/` (never rely on commit messages alone).
+2. Atomic commits (asset + brief + review + docs together). Prefixes advisory, not compliance.
+3. Merge after verification; no direct pushes to main for `strategy.md`, `brand/`, or `docs/decisions/`.
+4. Stage explicit pathspecs; verify staged scope before every commit - `git checkout <ref> -- <file>` silently STAGES the file.
+5. Push before posting a handoff: the sibling rig reads origin, not your disk.
+6. Freeze rule (event-driven): freeze on external handoff, a died direction, or a segment launch. Default snapshot-freeze in place (tag + a clean deliverable copy into `locked/`); full copy-forward reserved for true repositioning or handback. Never edit `locked/` or `archive/`.
+7. Cross-rig: commits are part of the channel - actionable messages; anything load-bearing lands in a durable repo file.
 
 ## 11 - Independent Review
-Independent review is the default for shippable and strategy-touching work; the drafter never reviews their own asset.
-1. Strategist + experiment-designer agents for plans and pre-registrations (bets above the §03 threshold).
-2. Brand-reviewer on everything shippable; critic with a persona panel scaled to the bet (full multi-persona for big/regulated bets; lighter for small reversible ones; regulator/legal always present for regulated-adjacent work).
-3. Coherence-auditor on the §06 triggers; researcher/reconcile for evidence gathering (the product repo is read-only).
-4. Pass only needed facts; findings are authoritative (dismissal documented in REVIEW.md or Key Insights).
+
+The drafter never reviews their own asset. Strategist + experiment-designer for plans and pre-registrations (bets above the §03 threshold); brand-reviewer on everything shippable; critic scaled to the bet; coherence-auditor on the §06 triggers; researcher/reconcile for evidence (the product repo read-only). Human-lane creatives: the agent owns the compliance re-review, nothing else. Pass only needed facts; findings are authoritative - dismissal documented in REVIEW.md or Key Insights.
 
 ## 12 - Evidence Discipline
-1. Every `strategy.md` claim cites a pack evidence file; every shipped factual claim is allowed by `claims.md` or backed by evidence referenced in REVIEW.md.
-2. Evidence files are append-only once they describe a completed source; corrections additive; superseded evidence is never deleted (new file, mark the old superseded, re-check citations).
-3. Verbatims over paraphrase; synthesized claims reference the underlying data; competitor files >90 days get flagged.
-4. Experiments: pre-register hypothesis + metric + instrumentation-readiness + decision rule; never edit a pre-registration; append results.
-5. Product-factual claims (pricing, trial, plan names, channel, privacy/data path) reconcile to the running product's actual config/code via `evidence/product/` ("claim -> code path @ commit"); `funnel/funnel-map.md` is the bridge; drift opens a `Trigger: product` decision.
-6. Regulated claims follow the §04 checklist; rulings are recorded verbatim.
 
-## 13 - Multi-Agent Coordination   <- generate ONLY if a live-coordinated partner rig exists (discovery Q11 = yes + agents on both sides)
+Every strategy claim cites a pack evidence file; every shipped factual claim is allowed by claims.md or backed by cited evidence. Evidence files are append-only once complete; superseded evidence is never deleted (new file, mark the old, re-check citations). Verbatims over paraphrase; competitor files >90 days get flagged. Experiments: pre-register hypothesis + metric + instrumentation-readiness + decision rule; never edit a pre-registration; numbers through the checked index. Reconcile before claim (§00.1) via `funnel/funnel-map.md` as the bridge. Cross-rig citations: number + commit/ref, never number alone.
 
-This engagement coordinates through LLM Bus (the live MCP coordination layer for AI agents and the humans driving them) together with the pack's coordination/ files. The division of labor is the rule that makes both work:
+## 13 - Multi-Agent and Human Coordination   <- generate ONLY if a partner rig or standing human collaborator exists
 
-**What each channel is FOR.** LLM Bus (the bus) is the source of truth for live coordination and allocation: handoffs, asks, acks (read receipts), presence, and shared-sequence claims (atomic claims, advisory leases, the task graph, and a queryable event ledger). The pack's coordination/<rig>.md (append-only log) is the durable archive and fail-open fallback: load-bearing outcomes are archived there, and it is the channel when the bus is down. The contract (coordination/<rig>-contract.md) records the agreed protocol. One source of truth per concern; do not narrate the same handoff twice - a post points at the committed file, the archive records the outcome.
+Coordinated through LLM Bus. This section carries the CONTRACT; generic mechanics (tool signatures, ritual details, current limits) are served live by the bus's own guide() - pull it whenever this section might be stale and after any bus migration notice; when the bus changes shape, re-check the settings allowlist against the live tool names.
 
-**Allocation - shared vs local sequences (important).** Only sequences NAMED AS SHARED in the coordination contract (e.g. a platform-level convention's R-numbers, migration prefixes) are claimed via claim() on the bus. This workspace's own decision numbering in docs/decisions/ is a LOCAL sequence: do NOT claim it against the shared project. If unsure whether a sequence is shared, check the contract, then ask the operator.
+Division of labor: the bus is the live source of truth for coordination and the small canonical state the operator watches on the Board - the task graph, decisions, claims, posts, presence. Coordination state is FLUSHABLE; identity, membership, sequences, and leases persist; the pack ledger and durable repo files are the record the Board is rebuilt from - never the reverse. Content stays in git, referenced by link. The pack's coordination log is the cold archive and fail-open fallback. Never narrate the same handoff twice.
 
-**Rituals (conditional triggers):** session start: whats_new + who_is_active + read inbox (ack what you read). Before relying on the other rig's state: read the bus, not a stale file. On handing off: post with a ref to the commit/file; archive the outcome in coordination/ when it lands. Lease only the (rare) files both rigs edit.
+The work-queue: anything with an owner and a done-state is a bus task; a note or FYI is a post (reading a post addressed to you marks it read); if an ask arrives as a post, file the task, then read the post. A worked engagement with an empty Board means the work is invisible.
 
-**Identity.** Lane naming is <product>-<role> (e.g. web-marketing); generic lanes collide across products. One token = one identity: sub-agents share the parent token and never register separately.
+Decisions and the routing rule: needing the operator (or any decider) is a TASK WITH OPTIONS assigned to them - the operator answers from the web Board; the reasoning lives in the `operator/open-items.md` entry the task cites (one item, two jobs; the entry survives a flush). A wait on a human is a decision task, never a blocked task; a wait on another task is a dependency (derived blocking, auto-unblocks with the answer delivered - record the ruling in `operator/rulings.md`, then resume); the manual block is only for non-task waits. File the decision task the moment the question arises. Filing is not a handoff: post to a waiting counterpart too.
 
-**Fail-open.** The bus is advisory. If unreachable: keep working, single-write the coordination log (append-only), reconcile when it returns. The LIVE product remains the source of truth for served surfaces; marketing holds a dated read-only mirror.
+THE HARD LINE (canonical here; §15 and Appendix B point): an agent never answers a decision task assigned to the operator. That assignment is the ASK-class boundary in the coordination layer; an agent answering it is a loop with no human in it, and it degrades silently because the resulting ruling looks identical to a real one. Agent-to-agent decision tasks are ordinary work.
 
-## 14 - Knowledge Layer   <- generate ONLY if a knowledge wiki was adopted (Phase 3 item 14); otherwise omit
+The loop: check the bus before starting work and at the end of every unit of work - the end-of-work check is where the next thing comes from. Board quiet and in-bounds work buildable: build it. Board quiet and nothing buildable: file a decision task saying so, then stop - never go quiet. No clock-driven cron ticks (operator-ruled in the field: a timer cuts across flow; the bus pushes open work on every tool response). SessionStart/Stop hooks make the two checks structural where supported. Optionally record an operator restart word.
 
-The pack keeps an OKF-shaped wiki (`<pack>/wiki/`) for knowledge that is neither the strategic contract nor a numbered decision (launch runbooks, channel playbooks, glossary, current-state). Maintain it:
+The operator's plate spans projects and is a pull surface; this rig NAMES its push channel here: <push channel>.
 
-1. Every node is a markdown file with YAML frontmatter carrying at minimum a `type` field. Keep the reserved index node and change-log node current (verify the exact reserved filenames and fields against the OKF spec).
-2. Adding or renaming a node updates the index node in the same commit; material edits append to the change-log node.
-3. Link between nodes with relative markdown links; link to a decision or to `strategy.md`, never restate them.
-4. One source of truth per concern: `strategy.md` + `brand/` hold the locked strategic contract; `docs/decisions/` holds the rationale; the wiki holds mutable current-state. Do not duplicate a fact across layers.
+Permission split (the §15 gate in settings): bus work tools - reads, posts, presence, the full task graph, claim and sequence reads, leases - on allow; identity-class admin tools - provisioning, revocation, rotation, invites, sequence seeding - on ask, never deny (identity operations are irreversible; ask preserves the capability while guaranteeing it never fires unattended).
+
+Cross-rig invariants: shared sequences claimed via claim() per the contract (this workspace's own decision numbering is LOCAL - never claimed); qualified ids for numbers from another project; one token = one identity (sub-agents share it; peers register separately, write-authority assigned in the contract - lanes are shared rooms, not walls); push before posting a handoff; the propose-back flow for product changes (a bus task referencing the commit; a `Trigger: product` decision only if a market fact moved); the round-trip copy pack (dev owns keys/slots, we own strings, brand-reviewer gates, confirm-live verifies); human lanes get contract-lites with off-agent gates the agent never crosses; the LIVE product is the source of truth for served surfaces; resolve topology via whoami, never pin it in prose. Fail-open: the bus is advisory - if unreachable, keep working, single-write the coordination log, reconcile when it returns.
+
+## 14 - Knowledge Layer   <- generate ONLY if a wiki was adopted
+
+The pack wiki (OKF-shaped) holds what is neither the strategic contract nor a numbered decision (runbooks, playbooks, glossary, current-state). Typed-node frontmatter, kept index + change-log nodes, links as the graph, a declared lifecycle per cluster (intent, not a control). One source of truth per concern: strategy.md + brand/ = the locked contract; decisions/ = rationale; the wiki = current-state - link, never restate. Verify the OKF spec at setup (Currency Rule).
+
+## 15 - Autonomous Operation   <- generate ONLY if scheduled/unattended sessions run
+
+Per candidate action:
+- **ACT** - proceed unattended when ALL hold: within the locked strategy and brand; reversible; nothing goes public; no spend; no owner-gated or parked item touched. Routine reconciles, drafts, coordination queue-work, evidence work live here.
+- **ACT + FLAG** - proceed, log to `operator/open-items.md` as an FYI entry: judgment-adjacent but high-confidence.
+- **ASK** - never unattended: anything public or irreversible; spend; anything touching locked strategy/brand/positioning/pricing; anything owner-gated. Convert to a numbered open-item and, where §13 exists, a decision task assigned to the operator (depend blocked work on it so the answer auto-resumes it) - then stop. Solo rigs: the open-item alone. The hard line stands (§13).
+
+Unattended sessions run §13's loop and end by refreshing `operator/open-items.md` - the operator returns to a numbered queue, not a transcript.
 ```
 
 ---
 
 # PHASE 5: CAPABILITY ACQUISITION
 
-Mirror of v1.4 Phase 5, with the commercialization specifics:
-
-1. **Inventory bundled skills** (verify the current inventory at bootstrap). The marketing-specific bundled surface is thin; expect the core reviewers to be generated.
-2. **Plugin marketplaces + MCP connectors:** analytics, ESP/CRM, competitive/research/SEO connectors, and Google Workspace / Drive connectors for the client-review-export delivery type. Trust boundaries: inspect before enabling; a candidate must respect a brand-voice file, produce BRIEF/REVIEW artifacts, and cite evidence; reject anything that generates ungrounded claims, bakes in a voice, or collides with a reserved name (§09 list). Record adoptions in docs/decisions/.
-3. **Generate the gaps:** the Phase 6 agents and Phase 7 skills.
+1. **Inventory bundled capabilities** (the live build's list is authoritative; the marketing-specific bundled surface is thin - expect the core reviewers to be generated). Every capability the generated CLAUDE.md names must satisfy §09's naming rule and resolve at generation time (Phase 8).
+2. **Plugin marketplaces + MCP connectors** (analytics, ESP/CRM, research/SEO, Workspace/Drive for delivery). Trust boundaries: inspect before enabling; candidates must respect a brand-voice file, produce BRIEF/REVIEW artifacts, and cite evidence; reject anything generating ungrounded claims, baking in a voice, or colliding with a reserved name. Record adoptions by decision.
+3. **Generate the gaps:** Phase 6 agents, Phase 7 workflows.
 
 ---
 
 # PHASE 6: CORE AGENTS (FALLBACK GENERATION)
 
-Generate only for capability gaps. All agents are **client-agnostic** (reference structure by role; client hard rules live in the pack). Tools scoped per agent; exploration agents are read-only and may carry Web tools; the product repo is always read-only. Thin skill wrappers per agent only if the runtime needs slash entry points (verify at bootstrap).
+Generate only for gaps. All client-agnostic; tools scoped; exploration agents read-only (+ Web tools); the product repo always read-only. The prompts reference the generated CLAUDE.md sections rather than duplicating them.
 
-- **`.claude/agents/strategist.md`** - independent Strategy Plans. Gathers the motion goal, the full pack `strategy.md`, relevant decisions and evidence, `brand/voice.md` + `claims.md`. Produces the §01 Strategy Plan. Must not introduce positioning/claims/ICP/channels absent from the lock, nor any claim `claims.md` prohibits. Output becomes the motion's `BRIEF.md`, confirmed with the operator.
-- **`.claude/agents/brand-reviewer.md`** - adversarial compliance review of an asset folder. Checks: (1) voice vs `voice.md` (em dash U+2014 = hard fail); (2) claims vs `claims.md` (prohibited/regulated = hard fail); (3) **delivery vs `guardrails.md`**; (4) factual accuracy with evidence citations incl. product reconciliation; (5) links + correct product URLs; (6) accessibility (alt text, headings, WCAG AA contrast); (7) positioning alignment with `strategy.md`; (8) brief integrity; (9) honesty markers on stand-ins; (10) locale correctness where multi-locale; (11) any Required Compliance Check. Appends findings to `REVIEW.md`.
-- **`.claude/agents/critic.md`** - persona panel, one isolated run per persona, panel scaled to the bet. Library: buyer, competitor, cfo, analyst, journalist, and (standard for regulated-adjacent domains) regulator/legal. Each persona: top-3 concerns, the questions they would ask, the strongest counter-argument, would it convert them. Aggregate into `REVIEW.md`.
-- **`.claude/agents/researcher.md`** - produces structured evidence files (header with date/source/method/sample-or-URLs; verbatims; cited URLs; interpretation labelled as inference; which strategy claims it touches; confidence). Writes to the pack's `evidence/<subfolder>/`, updates the index, re-cites from `strategy.md`.
-- **`.claude/agents/reconcile.md`** - reads the read-only product repo and produces `evidence/product/` reconciliation files ("claim -> code path @ commit -> match / drift"). Flags drift; recommends `Trigger: product` decisions and `funnel-map.md` updates; ties privacy/data-path confirmations to `gates.md` rows. Never edits the product repo.
-- **`.claude/agents/experiment-designer.md`** - pre-registers experiments for bets: hypothesis with direction + magnitude; primary metric; **instrumentation-readiness (an un-instrumented metric is a gate)**; guardrails; sample/duration reasoning; keep/iterate/kill decision rule written before results; confounders; read-out plan. Writes `evidence/experiments/<NNN>-<slug>.md`, status Pre-registered, immutable after launch; mirrors instrumentation dependencies in `gates.md` (+ the bus/coordination when cross-rig).
-- **`.claude/agents/coherence-auditor.md`** - audits the eight §06 drift dimensions across the pack + root on the §06 triggers; every discrepancy ends resolved or documented.
+- **strategist** - independent Strategy Plans per §01 from the pack's strategy.md, decisions, evidence, brand files, and rulings. Never introduces positioning/claims/channels absent from the lock, never fills a parked section. Output becomes the motion BRIEF, confirmed with the operator.
+- **brand-reviewer** - adversarial compliance review of an asset folder: voice (em dash = hard fail); claims vs claims.md incl. claim-family rulings (prohibited/regulated = hard fail); delivery vs guardrails.md; factual accuracy incl. product reconciliation; links; accessibility (WCAG AA); positioning alignment; brief integrity; honesty markers; locale correctness; third-party marks; Required Compliance Checks. Appends to REVIEW.md.
+- **critic** - persona panel, one isolated run per persona, scaled to the bet (buyer, competitor, cfo, analyst, journalist; regulator/legal standard for regulated-adjacent). Aggregates to REVIEW.md.
+- **researcher** - structured evidence files (date/source/method; verbatims; cited URLs; inference labelled; touched claims; confidence) into the pack's `evidence/`, index updated, re-cited.
+- **reconcile** - reads the read-only product repo; produces `evidence/product/` reconciliation files ("claim -> code path @ commit -> match / drift"); flags drift; recommends `Trigger: product` decisions and funnel-map updates; runs confirm-live after handoffs. Never edits the product repo.
+- **experiment-designer** - pre-registers per §12: hypothesis with direction + magnitude; primary metric; instrumentation-readiness (un-instrumented = a gate); guardrails; sample/duration; keep/iterate/kill rule before results; confounders; read-out plan. Immutable after launch; dependencies mirrored in gates.md.
+- **coherence-auditor** - audits the eight §06 dimensions on the §06 triggers, applying the wrong-surface discipline to every absence conclusion and stating every measurement's window. Every discrepancy ends resolved or documented.
 
 ---
 
 # PHASE 7: WORKFLOWS
 
-## skill: motion (`.claude/skills/motion/SKILL.md`) - the bet pipeline
-For strategic bets only; one in-flight at a time; weight scaled per §03.
-- **Step 0:** confirm no other motion in-flight; confirm this is a bet (else /produce); branch `motion/<slug>`; create the motion folder.
-- **Step 1 - Strategy:** strategist agent -> `BRIEF.md` (cites a PLAN item + the locked angle). Confirm with the operator before drafting.
-- **Step 2 - Draft:** ground voice in `brand/voice.md` and delivery in `brand/guardrails.md`; treat `visual.md` per its firmness; cite evidence for every concrete claim (product-factual via the reconcile agent). Hard guards: no em dashes; every `claims.md` prohibition; honesty markers.
-- **Step 3 - Brand review:** brand-reviewer agent; resolve every finding; do not advance on a fail.
-- **Step 4 - Critic:** persona panel scaled to the bet (regulator/legal always for regulated-adjacent); resolve or escalate to the strategist.
-- **Step 5 - Experiment design:** experiment-designer agent -> pre-register (incl. instrumentation-readiness); mirror gates.
-- **Step 6 - Ship:** run the motion DoD (§04 incl. the regulated-claim checklist); sync docs/gates/coordination; update PLAN.md; commit atomically; merge after verification.
-- **Step 7 - After results:** confirm instrumentation; apply the pre-registered rule; append the result; record the lesson; killed work -> `explorations/` + a decision.
+## workflow: produce - the main loop (the engine)
+Step 0: branch `produce/<slug>`; DoD-lite brief tied to a PLAN item + a strategy angle; check `operator/rulings.md` before asking anything. Step 1 - Draft: voice from `brand/voice.md`, delivery per `guardrails.md`, evidence for every concrete claim (product-factual via reconcile); hard guards: no em dashes, every claims.md prohibition, honesty markers, the media/visual rules. Step 2 - Brand review: do not advance on a fail; critic only if a claim or public risk is touched. **Step 3 - Operator approval (when required):** the work enters operator-approval-pending - a numbered `operator/open-items.md` entry, and where a bus exists a decision task with options assigned to the operator citing the item number (one item, two jobs); the work parks against it, with `task_depend` where other bus work waits on it. The answer lands in `rulings.md`; the dependent work auto-returns; resume. Step 4 - Handoff: a bus task referencing the pushed commit (push first), or per the human-lane contract; round-trip copy packs run here. Step 5 - Confirm-live: reconcile against the SERVED product; record; update gates/coordination. Ship per DoD-lite; update PLAN.md; commit atomically. If it grows into a bet, re-route through /motion.
 
-## skill: produce (`.claude/skills/produce/SKILL.md`) - the light track
-For production/ops work that is not a bet. Branch `produce/<slug>`; DoD-lite brief; draft with the same hard guards; brand-reviewer (critic only if a claim or public-facing risk is touched); ship per DoD-lite; if it grows into a bet, stop and re-route through /motion.
+## workflow: motion - the bet pipeline (the special case)
+One ACTIVE at a time; dormant pre-launch. Step 0: confirm no other active motion and that this is a bet; branch `motion/<slug>`. Steps: strategist -> BRIEF (operator-confirmed) -> draft (full rigor) -> brand review (resolve everything) -> critic (panel per bet; regulator/legal for regulated-adjacent) -> experiment-designer pre-registration (+ gates) -> ship per the Motion DoD -> after results, apply the pre-registered rule; killed work -> `explorations/` + a decision. Parking: a motion blocked on the operator/externals beyond a session or two is PARKED in PLAN.md with what unblocks it (its open-item number + decision task); unparking resumes at the step it left.
 
-## skill: deliver (`.claude/skills/deliver/SKILL.md`)
-Build or refresh a self-contained `delivery/<audience>/` export (agency-enablement | developer-handback | creator/partner-kit | client-review-export). Self-contained, decisions cited by number, honesty markers, the `gws` Drive recipe for client-review exports (rename-don't-delete). Runs on the /produce track.
+## workflow: strategize - the strategy workshop
+The Simple Strategy Framework as a re-runnable session feeding the locked `strategy.md`; the full pasteable process is the companion [strategy-workshop.md](strategy-workshop.md). Step 0 - Read from what exists (pack, decisions, running product); classify empty / partial / mature; emit a State Read + Gap List; never ask what the repo answers. Step 1 - Ask only the gaps. Step 2 - the five steps in order under the HOW test: Diagnosis (reconciled to the product) -> Goals (specific, measurable; deliberately deferred goals parked owner-gated) -> Directional Decisions -> Strategic Actions ("TBD, owner-gated" is a legitimate state) -> Iteration (cadence + triggers). Step 3 - Land it: the contract to the canonical homes (strategy.md, PLAN.md milestones, a decision per real directional choice); working artifacts as the slow-living OKF cluster in the pack wiki; **the action-board GENERATES PLAN milestones and bus tasks, never a fourth tracker**; gaps ship tagged with a researcher/reconcile task. Re-runs read the cluster, re-diagnose, diff, append to the iteration log.
 
-## skill: coordinate (`.claude/skills/coordinate/SKILL.md`) - OPTIONAL
-Generated/used only when a partner rig exists; **this is also how a partner is plugged in later** (no re-bootstrap). On first use: write `coordination/<rig>-contract.md` with the operator (push/pull locations, cadence, change-ID schemes, **shared vs local sequences**, lane names, the live-mirror rule) - and, if both rigs run agents, execute the **LLM Bus setup**:
+## workflow: deliver
+Build or refresh a self-contained `delivery/<audience>/` export (agency-enablement | developer-handback | creator/partner-kit | client-review-export); decisions cited by number; honesty markers; the Drive recipe (rename-don't-delete). Runs on the /produce track.
 
-1. The operator (or a project-admin lead agent via `create_invite`) mints an invite. The invite leads with the division of labor (what the bus is FOR vs git) and states: one token = one identity, sub-agents share it.
-2. Redeem at the public `/join` endpoint; the agent writes its own config (token in gitignored local settings). No-curl fallback: if the sandbox blocks the POST, hand the operator a copy-paste command.
-3. **A session restart is required** before the MCP tools load; after restart, confirm with `whoami`. (In deferred-tool harnesses the tools carry the `mcp__llm-bus__` prefix; search before assuming absence.)
-4. Join the ONE shared project for the coordination domain; lane `<product>-<role>`.
-5. Never seed or claim the workspace's local decision sequence; only the contract's shared sequences live on the bus. Shared sequences are seeded once by their owning rig, with the **last-used** number (the next claim returns last-used + 1).
-6. Write CLAUDE.md §13.
+## workflow: coordinate - OPTIONAL (also how a partner is plugged in later)
+On first use: write `coordination/<rig>-contract.md` with the operator (locations, cadence, change-ID schemes, shared-vs-local sequences, lanes, peer write-authority, the decision-task conventions + the operator's NAMED push channel, the live-mirror rule) and any human-lane contract-lites (incl. off-agent gates). If both rigs run agents, the LLM Bus setup:
+1. Enrollment is identity-first: `create_invite` with the joining human's email (they accept via the emailed link under their own identity); `admin_provision` only for additional agents the same person runs; one lead per project. The invite leads with the division of labor and the routing rule (operator waits are decision tasks, never blocked tasks).
+2. MCP tools load at session boot: a restart is required; confirm with `whoami`. If task tools are missing from the tool list, the client cached an old list - reconnect the server.
+3. Pull the bus's `guide()` and follow it for current mechanics (Currency Rule); never work from a remembered tool list.
+4. Sequences: only the contract's shared sequences live on the bus; never claim the workspace's local decision numbering; never seed over an existing sequence (list_sequences first).
+5. Write CLAUDE.md §13 (and §15 if unattended sessions run); wire the settings permission split checked against the live tool names.
+Ongoing: the §13 loop and invariants; owner-gated waits -> open-items + decision tasks; outcomes archived durably; cross-rig dependencies mirrored as gates rows; "live product = source of truth" reconciled before drafting.
 
-Ongoing use: handoffs/asks/acks flow over the bus referencing commits/files; outcomes are archived (append-only) in `coordination/<rig>.md`; cross-rig dependencies are mirrored as `gates.md` rows; reconcile "live product = source of truth" via the reconcile agent before drafting against product state.
-
-## skills: positioning-sprint, repair - generate on demand
-Carried from v0.3 unchanged in content (positioning re-lock via strategist + critic panel + decision + coherence sweep; repair classifies a failure as strategy / message / offer / operational / gate-stuck / cross-rig and routes accordingly - gate-stuck/cross-rig escalates on the bus AND in coordination/ and to the operator).
+## workflows: positioning-sprint, repair - generate on demand
+Positioning re-lock via strategist + critic panel + decision + coherence sweep. Repair classifies a failure (strategy / message / offer / operational / gate-stuck / cross-rig) and routes; gate-stuck/cross-rig escalates as a bus task AND an operator open-item + its decision task.
 
 ---
 
 # PHASE 8: HANDOFF VALIDATION
 
-1. `.claude/skills/` contains at minimum: motion, produce, deliver (+ coordinate if a partner rig); `.claude/agents/` contains: strategist, brand-reviewer, critic, researcher, reconcile, experiment-designer, coherence-auditor. positioning-sprint and repair are generate-on-demand.
-2. Root `CLAUDE.md` has the structure header + sections 00-12 (+ §13 only if live-coordinated, + §14 only if a knowledge wiki was adopted); it is client-agnostic.
-3. The ours layer exists (CLAUDE.md, .claude/, PLAN.md, README.md, scripts/, docs/decisions/ with 001 + index).
-4. The live pack exists with `strategy.md` (all sections), `evidence/` (five subfolders + index), `brand/` (voice/visual/claims/**guardrails**/README), `gates.md`, `funnel/funnel-map.md` (**mandatory if a running product exists**), the asset folders, `handoff.md`, `delivery/`, `explorations/`, and `coordination/` only if a partner rig is plugged in.
-5. `locked/` and `archive/` exist with READMEs; both empty until the first event-driven freeze.
-6. Client hard rules live in the pack, not in CLAUDE.md; launch gates in `gates.md`; cross-rig outcomes in `coordination/`, not in `handoff.md`.
-7. `PLAN.md` has Objectives, Milestones, Bootstrap, Current state, In-flight (one motion), Production/ops queue, Backlog, Key insights.
-8. `.claude/settings.local.json` gitignored; settings.json has scoped permissions + the brand-reviewer reminder hook.
-9. No skill shadows a bundled or reserved name.
-10. The circularity loop closes across both layers; every relative link resolves (a link-check script in `scripts/` is recommended).
-11. If live-coordinated: LLM Bus joined and confirmed post-restart (`whoami`), §13 present, the contract names shared vs local sequences, the coordination log exists as archive/fallback. If solo: no §13, no coordination artifacts.
-12. If a knowledge layer was adopted (optional): the pack's OKF wiki has typed-node frontmatter, the reserved index and change-log nodes, resolving cross-links, §14 present, and a decision recording the OKF spec revision verified at setup. If not adopted: no orphan wiki scaffold exists.
+1. The workflow surface holds produce, motion, strategize, deliver (+ coordinate if coordinated); agents: strategist, brand-reviewer, critic, researcher, reconcile, experiment-designer, coherence-auditor (positioning-sprint and repair on demand).
+2. Root `CLAUDE.md`: the structure header + §§00-12 (+§13/§14/§15 exactly per discovery), client-agnostic, and **inside the Phase 0 budget; the size check exists and has been mutation-verified**.
+3. Every capability the generated CLAUDE.md names is a repo file, a conditional reference, or re-checked (§09); no workflow shadows a bundled or reserved name.
+4. The ours layer exists (incl. `docs/decisions/` with 001 + its checked index/Status script); the live pack exists complete (operator/, strategy.md with parked sections marked, evidence/ + indexes, brand/ incl. guardrails + workshop, gates.md with the full vocabulary, funnel-map where a product runs, asset folders incl. acquisition/, handoff.md, delivery/, explorations/, coordination/ only if coordinated).
+5. `locked/` + `archive/` exist with READMEs; client hard rules live in the pack, not CLAUDE.md; PLAN.md complete (incl. the Production/ops queue; pre-launch mode reflected where stage = pre-launch).
+6. Settings: gitignored local overrides; scoped permissions + the reminder hook; where coordinated, the §13 bus split **checked against the live tool names**.
+7. If coordinated: bus joined (post-restart `whoami`), §13 present with the push channel NAMED, the contract records sequences/lanes/write-authority/conventions, **owner-gated waits route as decision tasks - never blocked tasks**, human-lane contract-lites exist. If solo: no §13, no coordination artifacts.
+8. If a wiki was adopted: it validates (typed nodes, lifecycles, index + change-log, resolving links) with its decision. If /strategize ran: the strategy cluster links to the contract, and action-board entries link to the milestones/tasks they generated.
+9. If unattended sessions run: §15 present; ASK-class conversions file decision tasks where §13 exists; every unattended entry point ends by refreshing `operator/open-items.md`.
+10. The circularity loop closes across both layers; every relative link resolves.
 
-Then ask: "Environment ready. Use `/positioning-sprint` to lock strategy (or a strategist pass + decision), `/motion <name>` to run the first bet, or `/produce <name>` for production/ops work."
+Then ask: "Environment ready. Use `/strategize` to build the strategy, `/produce <name>` for production/ops (the main loop), `/motion <name>` when a real bet is ready, `/positioning-sprint` to re-lock after a shift."
 
 ---
 
 # APPENDIX A: CROSS-RIG PORTABILITY AND COORDINATION
 
-**Portability.** Projects are operable interchangeably by Claude Code (native loading) and by autonomous agents on your platform (context injection at spawn: `CLAUDE.md` full, `PLAN.md` full, and from the live pack `strategy.md` + `brand/voice.md` + `brand/claims.md` + `brand/guardrails.md` + `gates.md`, plus task-relevant decisions and evidence). The freeze rule travels: a sub-agent edits only the live pack. Register the project in your platform's project registry as a commerce-type project after bootstrap.
-
-**Coordination.** Absent by default; pluggable any time via `/coordinate`. When present: the bus (LLM Bus) carries the live exchange; the contract records the protocol (incl. shared-vs-local sequences and lane names); the append-only log archives load-bearing outcomes and is the fail-open fallback; cross-rig dependencies are mirrored as `gates.md` rows owned by the other rig; the product is also evidence (the reconcile agent reads it read-only); a product change that moves a marketing fact opens a `Trigger: product` decision. The LIVE product is the source of truth for served surfaces; marketing holds a dated read-only mirror.
-
----
+Projects are operable interchangeably by Claude Code (native loading) and by autonomous platform agents (context injection at spawn: CLAUDE.md + PLAN.md full, and from the pack strategy.md + brand/voice.md + claims.md + guardrails.md + gates.md + operator/rulings.md, plus task-relevant decisions and evidence). The freeze rule travels: a sub-agent edits only the live pack. This is why the Phase 0 load discipline permits moving rules only to surfaces structurally loaded in every consuming harness. Coordination is absent by default and pluggable via /coordinate; when present, the bus carries the live exchange per §13, and the LIVE product is the source of truth for served surfaces.
 
 # APPENDIX B: WHAT THIS PROTOCOL DOES NOT DO
 
-1. No customer interview execution (recording transcripts into evidence is in scope; conducting interviews is not).
-2. No paid media buying (channel decisions/copy/measurement in scope; trafficking is not).
-3. No CRM/ESP/Drive data writes unless a connector is configured with scope and explicit user confirmation.
-4. No legal/regulatory advice: a human writes the claims rules and gives sign-off (recorded as gates + verbatim rulings).
-5. No living analytics dashboards.
-6. No edits to the sibling product repo (read-only, always).
+1. No customer interview execution. 2. No paid media buying. 3. No CRM/ESP/Drive data writes without a configured connector + explicit confirmation. 4. No legal/regulatory advice: humans write the claims rules and sign off (gates + verbatim rulings). 5. No living analytics dashboards. 6. No edits to the sibling product repo (read-only, always). 7. No crossing of off-agent gates. 8. No answering a decision task assigned to the operator - ever (§13, the hard line).
 
----
+# APPENDIX C: OPEN QUESTIONS FOR v1.0
 
-# APPENDIX C: OPEN QUESTIONS FOR v0.6
+1. Multi-product portfolio mode (shared brand upstream vs per-product packs). 2. Automated competitor monitoring. 3. Cross-version diffing + promotion tooling. 4. Generic-vs-client lint. 5. Gate-register automation (machine-checkable gates refusing a publish until cleared). 6. Delivery-export tooling. 7. Product-doc lifecycle marketing mirror (waits for pack-side evidence of need).
 
-1. **Multi-product portfolio mode.** Shared `brand/` upstream vs per-product packs; upstream brand syncing mechanics.
-2. **Automated competitor monitoring** (scheduled refresh vs auditor flagging).
-3. **Cross-version diffing + promotion tooling** (a `/version` skill for freeze-and-fork with link-integrity checks).
-4. **Generic-vs-client lint** (fail if client specifics appear in `CLAUDE.md` or `.claude/`).
-5. **Gate-register automation** (machine-checkable gates that refuse a publish step until cleared).
-6. **Delivery-export tooling** (generalize the `gws` recipe into a reusable script; templating per delivery type).
+**Resolved in v0.9 (the compression + bus-v2 release, mirroring claude-code v1.7):** §13 rewritten contract-only on the v2 task graph (decisions-as-tasks with options; derived blocking + auto-unblock; no-ack read semantics; flush semantics; qualified ids; lanes-as-rooms) with generic mechanics served by the live guide() under the extended Currency Rule; the attention budget with a checked ceiling + one-rule-one-home + scars-as-tagged-rules + the deletion test; the board-is-the-loop event-driven operating model with clock crons retired; capability naming + native-first calibration with the family floor; the test-then-delete measurement fold.
 
-**Resolved in v0.4 (were open in v0.3):**
-- **Coordination automation:** LLM Bus is the live channel with the bus-vs-git division of labor; remaining automation (watch/subscribe on surfaces, typed cross-rig handoff objects, push-style unread surfacing) is tracked as proposals in the LLM Bus product, not in this protocol.
-- **Guardrails vs claims** split modeled (`brand/guardrails.md`).
-- **Regulated-claim workflow** is a named, never-skippable DoD checklist.
-- **Freeze rhythm** clarified as event-driven.
-- **Ceremony scaling** (critic panel + experiment machinery scale with bet size/spend).
-- **Working-language rule** (engagements run in the operator's language; structures stay language-neutral).
+**Resolved in v0.8:** the operator-wait routing + limits + rituals wired through /produce approval-pending, parked motions, PARKED gates, and §15 (in v1-era terms, re-expressed by v0.9); the named push channel; the hard line; the bus permission split; wrong-surface + window discipline; the trigger-scoped-rules principle; checked indexes/Status headers. **Resolved in v0.7:** /produce as the engine; pre-launch mode; parked motions; the operator ledger; reconcile-before-claim headlined; the round-trip copy pack; task-graph-first coordination; the §15 gate; gate WAIVED/RISK-ACCEPTED; snapshot-freeze; content scaffolding. **Earlier:** v0.6 /strategize; v0.4/v0.5 the bus model, guardrails-vs-claims, regulated-claim workflow, event-driven freezes, OKF; v0.3 and before, the ours/client split, packs, the decision spine, gates.md, two tracks, delivery, code-as-evidence.
 
-**Carried from v0.3 (resolved earlier):** the ours/client split; versioned packs; the freeze-rule lifecycle; the decision spine; explorations vs archive; gates.md; the two-track model; multi-target delivery; code-as-evidence; funnel-shape-agnostic mapping; localization as operator choice.
-
-End of v0.5.
+End of v0.9.
