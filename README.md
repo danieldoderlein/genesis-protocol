@@ -13,19 +13,56 @@ we use to build our own software, opened up so you can use them too.
 
 | Protocol | For | Current |
 |----------|-----|---------|
-| [claude-code.md](claude-code.md) | Claude Code (Anthropic) projects | v1.7 |
+| [claude-code.md](claude-code.md) | Claude Code (Anthropic) projects | v1.13 |
 | [antigravity.md](antigravity.md) | Antigravity (Google) projects | v4.5 |
 | [commercialization.md](commercialization.md) | Marketing and commercialization work, on the same substrate | v0.9 |
 
-**What's new in v1.7 (and its marketing mirror, v0.9): the lean harness.** Field measurement
-across production projects showed the always-loaded rule files these protocols generate tend to
-grow until agents start ignoring them. v1.7 turns that finding into method: an attention budget
-with a mechanically checked line ceiling; one rule, one home (no restating); incident lessons kept
-as short tagged rules with the story in a decision file; a capability discipline that stops rules
-from mandating tools that no longer exist; and test-then-delete measurement, so every removal is
-an experiment with a recorded result rather than deletion on faith. Coordination is rewritten on
-the LLM Bus v2 task graph with an autonomous board-is-the-loop model: agents check the shared
-board at the natural boundaries of their work - no polling, no cron timers.
+And one tool: [bus-mode/](bus-mode/README.md), which keeps a Claude Code session working its
+coordination board after you leave (see "Bus mode" below).
+
+**What's new in Claude Code since v1.7.** Six versions of field use on our own projects, folded in:
+
+- **An unattended posture that does not freeze.** An `ask` permission rule stops the session for
+  approval in every permission mode, Bypass included, so a session left running carries no `ask`
+  rules anywhere in its merged settings. Unattended means Bypass chosen at launch plus a mandatory
+  deny floor derived from what the machine can reach; `auto` is the attended posture, because it
+  falls back to prompting. A tool cannot set the mode for you, and the agent never asks a question
+  nobody is there to answer: it files a decision task instead.
+- **Load proofs.** A settings file with an error is skipped whole, and the protocol says how to prove
+  your settings actually loaded, against the build you have installed.
+- **The lead and its helpers.** One lead session per project runs the reviews and checks every
+  helper's "done"; helpers get a five-part brief and return a file plus five lines; model choice is
+  made by kind of work and named by tier, never by model version. One project, one repo, with a
+  stage question (shaping, building, commercial) and a conditional commercial section.
+- **One handover shape.** A dated handoff block at the top of PLAN.md, written on clear triggers, so
+  any session can pick the work up.
+- **Coordination.** Section 13 points at the LLM Bus's own live `guide()` for mechanics instead of
+  restating them, and an answer the operator gives in a session is recorded on the bus as theirs.
+- **Machines and identity.** Every project names one home machine (a workstation or an always-on
+  hub) where its agents live; collaborators work from any other clone as themselves; the start
+  interview settles the identities (repo owner, git author, cloud and service accounts) and pins them
+  per project.
+- **Unattended chains.** A step handed to an agent needs that agent's wake test on record, passed only
+  when the woken session actually performed the step, or a deadline that escalates to the operator.
+
+## Correction: commercialization v0.9 and ask rules
+
+`commercialization.md` (v0.9) says, in section 13's permission split, to put identity-class bus admin
+tools (provisioning, revocation, rotation, invites, sequence seeding) "on ask, never deny", because an
+ask "never fires unattended". That is wrong. Measured on Claude Code: an `ask` rule blocks in every
+permission mode, `bypassPermissions` included, so an unattended session that reaches one stops and
+waits for an answer nobody gives.
+
+The correct rule:
+
+- A session that runs unattended carries zero `ask` rules across its merged settings (managed, user,
+  project and local).
+- Put identity-class tools on `deny`. A deny binds in every mode and protects without asking; the
+  operator lifts it deliberately, in an attended session, when the action is wanted.
+- Attended sessions may keep `ask` rules where a person is present to answer them.
+
+`claude-code.md` v1.13 carries this rule in its text. For commercialization v0.9, apply it when you
+bootstrap or upgrade a project.
 
 ## Quick start
 
@@ -35,16 +72,28 @@ scaffolds a compliant, drift-resistant environment for you.
 
 ## Upgrading an existing project
 
-Already running a project bootstrapped on an earlier version? Two upgrade (migration) prompts
-bring a live workspace forward in place - code, decisions, and local rules survive:
+Already running a project bootstrapped on an earlier version? The upgrade (migration) prompts bring a
+live workspace forward in place - code, decisions, and local rules survive:
 
-- [claude-code-upgrade.md](claude-code-upgrade.md) - entry paths from v1.3 through v1.6
-- [commercialization-upgrade.md](commercialization-upgrade.md) - entry paths from v0.4 through v0.8
+- [claude-code-upgrade.md](claude-code-upgrade.md) - for workspaces on v1.8 through v1.12, straight to v1.13
+- [commercialization-upgrade.md](commercialization-upgrade.md) - entry paths from v0.4 through v0.8 (unchanged)
 
-Paste the upgrade prompt to the agent that operates the workspace, and provide the current
-protocol text alongside it. The core operation is compression of your always-loaded rules, not
-addition - and every removal is recorded, so the upgrade is measurable and reversible. Projects
-older than the entry paths are best re-bootstrapped from the current protocol file.
+Paste the upgrade prompt to the agent that operates the workspace, and provide the current protocol
+text alongside it. Every change is recorded, so the upgrade is measurable and reversible.
+
+**On v1.7 or older (including the previous public release)?** There is no in-place upgrade from here:
+re-bootstrap from the current [claude-code.md](claude-code.md), carrying your decisions and PLAN
+forward. The same holds for commercialization projects older than v0.4.
+
+## Bus mode
+
+[bus-mode/](bus-mode/README.md) is a small, zero-dependency Stop hook with a spoken toggle. Say "bus
+mode on" when you leave a session: whenever a turn ends and the [LLM Bus](https://llm-bus.com) board
+has work for that session, the hook wakes it instead of letting it go idle, and the session rests when
+nothing is left that it can take. Install it once per machine by cloning this repository to
+`~/genesis-protocol` and pointing one user-level Stop hook at `~/genesis-protocol/bus-mode/`; each repo
+then adopts it with one pasted line. Its README has the install, the adoption prompt and the posture
+an unattended run needs.
 
 ## The circularity loop
 
